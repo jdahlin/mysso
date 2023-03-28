@@ -14,7 +14,6 @@ jwks_client.fetch_data()
 def before_request() -> None:
     header = request.headers.get("Authorization")
     if not header:
-        print("missing header")
         abort(401)
         return
     token = header.split("Bearer ", 1)[1]
@@ -28,9 +27,9 @@ def before_request() -> None:
             audience=APPLICATION_NAME,
         )
     except jwt.PyJWTError as e:
-        print(e)
         abort(401)
     return None
+
 
 @app.route("/protected_endpoint", methods=["GET"])
 def protected_endpoint() -> Response:

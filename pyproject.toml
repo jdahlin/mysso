@@ -98,11 +98,9 @@ ignore = [
 
 [tool.mypy]
 mypy_path = "src"
-
 python_version = "3.11"
 strict = true
 warn_unused_configs = true
-#explicit_package_bases = true
 namespace_packages = false
 show_error_codes = true
 show_column_numbers = true
