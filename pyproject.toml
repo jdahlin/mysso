@@ -1,0 +1,118 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "sso"
+description = 'Simple Single-Sign On Web Application.'
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MIT"
+keywords = []
+authors = [{ name = "Johan Dahlin", email = "jdahlin@gmail.com" }]
+classifiers = [
+  # https://pypi.org/classifiers/
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: Implementation :: CPython",
+]
+dynamic = ["version"]
+dependencies = [
+    "fastapi",
+    "FastAPI-SQLAlchemy",
+    "SQLAlchemy",
+    "jwskate",
+    "typer",
+    "uvicorn"
+]
+
+[tool.hatch.version]
+path = "src/sso/__version__.py"
+
+[project.optional-dependencies]
+appservice = ["Flask", "pyjwt"]
+appclient = ["requests", "requests-auth", "typer"]
+lint = ["black", "ruff"]
+types = ["mypy"]
+test = ["pytest"]
+dev = ["sso[lint,types,test]"]
+
+[project.urls]
+Source = "https://github.com/jdahlin/sso"
+Tracker = "https://github.com/jdahlin/sso/issues"
+
+[project.scripts]
+ssotool = "sso.cli:main"
+
+[tool.ruff]
+src = ["src"]
+line-length = 88 # black default
+select = [
+  "F",     # pyflakes
+  "E",     # pycodestyle (supersedes pep8)
+  "W",     # pycodestyle warnings
+  "C90",   # mccabe
+  "I",     # isort
+  "N",     # pep8-naming
+  # "D",   # pydocstyle
+  "UP",    # pyupgrade
+  "ERA",   # eradicate
+  "YTT",   # flake8-2020
+  "ANN",   # flake8-annotations
+  "S",     # flake8-bandit
+  "BLE",   # flake8-blind-except
+  "FBT",   # flake8-boolean-trap
+  "B",     # flake8-bugbear
+  "A",     # flake8-builtins
+  "COM",   # flake8-commas
+  "C4",    # flake8-comprehensions
+  "DTZ",   # flake8-datetimez
+  "T10",   # flake8-debugger
+  # "EM",  # flake8-errmsg
+  "EXE",   # flake8-executable
+  "ICN",   # flake8-import-conventions
+  "PIE",   # flake8-pie
+  # "T20", # flake8-print
+  "PYI",   # flake8-pyi
+  "Q",     # flake8-quotes
+  "RSE",   # flake8-raise
+  # "RET", # flake8-return
+  "SLF",   # flake8-self
+  "SIM",   # flake8-simplify
+  "TID",   # flake8-tidy-imports
+  "TCH",   # flake8-type-checking
+  # "ARG", # flake8-unused-arguments
+  "PGH",   # pygrep-hooks
+  "PLC",   # pylint Convention
+  "PLE",   # pylint Error
+  "PLR",   # pylint Refactor
+  "PLW",   # pylint Warning
+  "RUF",  # ruff-specific rules
+
+]
+ignore = [
+  "ANN101",
+  "ANN102"
+]
+
+[tool.mypy]
+mypy_path = "src"
+
+python_version = "3.11"
+strict = true
+warn_unused_configs = true
+#explicit_package_bases = true
+namespace_packages = false
+show_error_codes = true
+show_column_numbers = true
+show_error_context = true
+pretty = true
+
+[[tool.mypy.overrides]]
+module = ["requests_auth"]
+ignore_missing_imports = true
+
+#
+#[tool.pytest.ini_options]
+#addopts = "--ignore=tests/manual"
