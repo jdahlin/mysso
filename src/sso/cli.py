@@ -1,10 +1,12 @@
 """Command line interface for the SSO server."""
 import contextlib
 from collections.abc import Generator
-from typing import Any
 
 import typer
+from sqlalchemy.orm import Session
 
+import sso.conftest
+from sso.endpoints.hashutils import hash_password
 from sso.exceptions import UnauthorizedError
 from sso.keys import get_public_key
 from sso.models import Application, User
@@ -16,14 +18,15 @@ app = typer.Typer()
 
 
 @contextlib.contextmanager
-def get_db() -> Generator[Any, None, None]:
+def get_db() -> Generator[Session, None, None]:
     """Create a database session and yield it."""
     from fastapi_sqlalchemy import DBSessionMiddleware, db
 
     from sso.app import app as fast_api_app
+
     DBSessionMiddleware(app=fast_api_app, db_url=SQLALCHEMY_DATABASE_URL)
-    with db():
-        yield db
+    with db() as db1:
+        yield db1.session
 
 
 @app.command()
@@ -32,18 +35,17 @@ def init() -> None:
     from pathlib import Path
 
     from jwskate import Jwk
+
     private_jwk = (
-        Jwk.generate_for_alg("ES256")
-        .with_kid_thumbprint()
-        .with_usage_parameters()
+        Jwk.generate_for_alg("ES256").with_kid_thumbprint().with_usage_parameters()
     )
     key_dir = Path(__file__).parent.parent / "keys"
     key_dir.mkdir(exist_ok=True)
-    private_key_pem = (key_dir / "private_key.pem")
+    private_key_pem = key_dir / "private_key.pem"
     with private_key_pem.open("wb") as f:
         f.write(private_jwk.to_pem(""))
     private_key_pem.chmod(0o600)
-    public_key_pem = (key_dir / "public_key.pem")
+    public_key_pem = key_dir / "public_key.pem"
     with public_key_pem.open("wb") as f:
         f.write(private_jwk.public_jwk().to_pem(""))
     public_key_pem.chmod(0o644)
@@ -53,19 +55,16 @@ def init() -> None:
 
 def ask_password() -> str:
     """Ask the user for a password and return the hashed version."""
-    import hashlib
     from getpass import getpass
-    password = getpass()
-    hashed_password = hashlib.sha256(password.encode()).hexdigest()
-    return hashed_password
+
+    return hash_password(getpass())
 
 
 @app.command()
 def add_user(email: str, hashed_password: str = "") -> None:
     """Add a user to the database."""
-    db: Any
-    with get_db() as db:
-        if db.session.query(User).filter_by(email=email).count():
+    with get_db() as session:
+        if session.query(User).filter_by(email=email).count():
             raise SystemExit(f"ERROR: User {email} already exists.")
         if not hashed_password:
             hashed_password = ask_password()
@@ -73,52 +72,53 @@ def add_user(email: str, hashed_password: str = "") -> None:
             email=email,
             hashed_password=hashed_password,
         )
-        db.session.add(user)
-        db.session.commit()
+        session.add(user)
+        session.commit()
 
 
 @app.command()
 def remove_user(email: str) -> None:
     """Remove a user from the database."""
-    db: Any
-    with get_db() as db:
-        user = db.session.query(User).filter_by(email=email)
+    with get_db() as session:
+        user = session.query(User).filter_by(email=email)
         if not user.exists():
             raise SystemExit(f"User {email} does not exist.")
-        db.session.delete(user)
-        db.session.commit()
+        session.delete(user)
+        session.commit()
 
 
 @app.command()
 def add_application(email: str, application: str) -> None:
     """Add an application to a user."""
-    db: Any
-    with get_db() as db:
-        user = db.session.query(User).filter_by(email=email).one()
+    with get_db() as session:
+        user = session.query(User).filter_by(email=email).one()
         user.applications.append(Application(name=application))
-        db.session.add(user)
-        db.session.commit()
+        session.add(user)
+        session.commit()
 
 
 @app.command()
 def remove_application(email: str, application: str) -> None:
     """Remove an application from a user."""
-    db: Any
-    with get_db() as db:
+    with get_db() as session:
         application = (
-            db.session.query(Application)
+            session.query(Application)
             .join(User)
             .filter(User.email == email, Application.name == application)
             .one()
         )
-        db.session.delete(application)
-        db.session.commit()
+        session.delete(application)
+        session.commit()
 
 
 @app.command()
-def login(*,
-          email: str, hashed_password: str = "", audience: str = "login",
-          verify: bool = False) -> int:
+def login(
+    *,
+    email: str,
+    hashed_password: str = "",
+    audience: str = "login",
+    verify: bool = False,
+) -> int:
     """Login a user and print the access and refresh tokens."""
     if not hashed_password:
         hashed_password = ask_password()
@@ -144,6 +144,7 @@ def login(*,
         print(refresh_token.claims)
         if verify:
             from jwskate import JwsCompact
+
             jws = JwsCompact(str(access_token))
             print(get_public_key())
             print(jws.verify_signature(get_public_key(), alg=JWT_ALGORITHM))

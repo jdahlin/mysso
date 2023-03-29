@@ -1,4 +1,3 @@
-import hashlib
 import time
 
 import requests
@@ -6,23 +5,26 @@ import typer
 from requests import Session
 from requests_auth import OAuth2ClientCredentials
 
+from sso.endpoints.hashutils import hash_password
+
 APPLICATION_API_URL = "http://localhost:5001"
 SSO_API_URL = "http://127.0.0.1:5000"
 SSO_AUTH_EMAIL = "jdahlin@gmail.com"
 SSO_AUTH_SECRET = "foobar"  # noqa: S105
 
 
-def main(application_name: str = "application-service-1",
-         application_api_url: str = APPLICATION_API_URL,
-         sso_api_url: str = SSO_API_URL,
-         client_id: str = SSO_AUTH_EMAIL,
-         client_secret: str = SSO_AUTH_SECRET) -> None:
-    hashed_password = hashlib.sha256(client_secret.encode()).hexdigest()
+def main(
+    application_name: str = "application-service-1",
+    application_api_url: str = APPLICATION_API_URL,
+    sso_api_url: str = SSO_API_URL,
+    client_id: str = SSO_AUTH_EMAIL,
+    client_secret: str = SSO_AUTH_SECRET,
+) -> None:
     session = Session()
     session.auth = OAuth2ClientCredentials(
         token_url=f"{sso_api_url}/oauth2/token",
         client_id=client_id,
-        client_secret=hashed_password,
+        client_secret=hash_password(client_secret),
         scope=application_name,
     )
 

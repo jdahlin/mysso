@@ -19,7 +19,8 @@ def authenticate(body: AuthenticateRequest) -> TokenPairResponse:
     user = User.try_password_login(
         email=body.email,
         hashed_password=body.hashed_password,
-        audience=body.audience)
+        audience=body.audience,
+    )
 
     token_context = TokenContext(user=user, audience=body.audience)
     access_token, refresh_token = token_context.create_tokens()

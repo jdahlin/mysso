@@ -26,7 +26,7 @@ def before_request() -> None:
             issuer=SSO_API_URL,
             audience=APPLICATION_NAME,
         )
-    except jwt.PyJWTError as e:
+    except jwt.PyJWTError:
         abort(401)
     return None
 

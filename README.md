@@ -1,6 +1,8 @@
 Demo
 ====
 
+Needs Python 3.11
+
 TODO: Write better and a more thorough explanation of the demo.
 
 * `pip install .`

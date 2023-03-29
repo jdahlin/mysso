@@ -27,14 +27,14 @@ class OAuth2TokenResponse(BaseModel):
 
 
 @app.post("/oauth2/token")
-async def oauth2_token(   # noqa: PLR0913
-        credentials: Annotated[HTTPBasicCredentials, Depends(security)],
-        grant_type: Annotated[str, Form()],
-        scope: Annotated[Audience, Form()],
-        username: Annotated[Email, Form()] | None = None,
-        password: Annotated[PasswordHashedInSha256, Form()] | None = None,
-        refresh_token: Annotated[str, Form()] | None = None,
-        redirect_uri_port: Annotated[int, Form()]  | None = None,
+async def oauth2_token(  # noqa: PLR0913
+    credentials: Annotated[HTTPBasicCredentials, Depends(security)],
+    grant_type: Annotated[str, Form()],
+    scope: Annotated[Audience, Form()],
+    username: Annotated[Email, Form()] | None = None,
+    password: Annotated[PasswordHashedInSha256, Form()] | None = None,
+    refresh_token: Annotated[str, Form()] | None = None,
+    redirect_uri_port: Annotated[int, Form()] | None = None,
 ) -> OAuth2TokenResponse:
     """This endpoint is used to obtain an access token and a refresh token."""
     match grant_type:
@@ -52,14 +52,16 @@ async def oauth2_token(   # noqa: PLR0913
             user = User.try_password_login(
                 email=username,
                 hashed_password=password,
-                audience=scope)
+                audience=scope,
+            )
         # OAuth2 Client Credentials Grant
         # https://www.rfc-editor.org/rfc/rfc6749#section-4.4
         case "client_credentials":
             user = User.try_password_login(
                 email=credentials.username,
                 hashed_password=credentials.password,
-                audience=scope)
+                audience=scope,
+            )
         # OAuth2 Refreshing an Access Token
         # https://www.rfc-editor.org/rfc/rfc6749#section-6
         case "refresh_token":
@@ -68,7 +70,7 @@ async def oauth2_token(   # noqa: PLR0913
             user = User.try_refresh_token_login(
                 insecure_token_payload=refresh_token,
                 audience=scope,
-           )
+            )
         case _:
             raise UnsupportedGrantTypeError(grant_type)
 
@@ -78,5 +80,5 @@ async def oauth2_token(   # noqa: PLR0913
         access_token=Base64EncodedToken(str(access_token_jwt)),
         refresh_token=Base64EncodedToken(str(refresh_token_jwt)),
         expires_in=token_context.access_token_lifetime,
-        token_type="bearer",   # noqa: S106
+        token_type="bearer",  # noqa: S106
     )

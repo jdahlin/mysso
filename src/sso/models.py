@@ -22,6 +22,7 @@ def generate_uuid4() -> str:
 class Base(DeclarativeBase):
     pass
 
+
 class User(Base):
     """A user of the system."""
 
@@ -33,7 +34,8 @@ class User(Base):
     is_active = Column(Boolean, default=True)
     applications: Mapped[list["Application"]] = relationship(back_populates="user")
     refresh_token_expirations: Mapped[list["RefreshTokenExpiration"]] = relationship(
-        back_populates="user")
+        back_populates="user",
+    )
 
     @validates("email")
     def validate_email(self, key: str, address: str) -> str:
@@ -42,16 +44,17 @@ class User(Base):
         return address
 
     @classmethod
-    def try_password_login(cls, *,
-                           email: str,
-                           hashed_password: str,
-                           audience: str) -> "User":
+    def try_password_login(
+        cls,
+        *,
+        email: str,
+        hashed_password: str,
+        audience: str,
+    ) -> "User":
         try:
             user = (
                 db.session.query(User)
-                .filter_by(email=email,
-                           hashed_password=hashed_password,
-                           is_active=True)
+                .filter_by(email=email, hashed_password=hashed_password, is_active=True)
                 .join(Application)
                 .filter(Application.name == audience)
                 .one()
@@ -62,9 +65,11 @@ class User(Base):
             return user
 
     @classmethod
-    def try_refresh_token_login(cls,
-                                insecure_token_payload: str,
-                                audience: str) -> "User":
+    def try_refresh_token_login(
+        cls,
+        insecure_token_payload: str,
+        audience: str,
+    ) -> "User":
         jws = JwsCompact(insecure_token_payload)
         if not jws.verify_signature(get_public_key()):
             raise UnauthorizedError("Invalid refresh token")
