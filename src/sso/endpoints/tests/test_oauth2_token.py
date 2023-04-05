@@ -7,15 +7,15 @@ from sqlalchemy.orm import Session
 from starlette.testclient import TestClient
 
 from sso.app import app
-from sso.endpoints.hashutils import hash_password
 from sso.keys import get_public_key
 from sso.models import User
+from sso.passwordutils import hash_password
 
 
 def test_client_credentials(client: TestClient, session: Session) -> None:
     auth = httpx.BasicAuth(
         username="bob@example.com",
-        password=hash_password("secret"),
+        password=hash_password("secret", "salt"),
     )
     user = session.query(User).filter_by(email="bob@example.com").one()
 

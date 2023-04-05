@@ -20,11 +20,13 @@ class OAuth2AuthorizeResponse(BaseModel):
 # https://www.rfc-editor.org/rfc/rfc6749#section-4.2.1
 @app.get("/oauth2/authorize")
 def oauth2_authorize(
-    response_type: str,  # noqa: PLR0913
+    response_type: str,
     client_id: str,
     redirect_uri: str | None = None,
     client_secret: str | None = None,
     scope: str | None = None,
     state: str | None = None,
+    code_challenge: str | None = None,
+    code_challenge_method: str | None = None,
 ) -> OAuth2AuthorizeResponse:
     raise EndpointNotImplementedError

@@ -2,6 +2,6 @@
 
 This runs when you type python -msso
 """
-from sso.cli import app
+from sso.cli.main import main_app
 
-app()
+main_app()

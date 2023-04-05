@@ -10,7 +10,7 @@ from sso.endpoints.hashutils import hash_password
 APPLICATION_API_URL = "http://localhost:5001"
 SSO_API_URL = "http://127.0.0.1:5000"
 SSO_AUTH_EMAIL = "jdahlin@gmail.com"
-SSO_AUTH_SECRET = "foobar"  # noqa: S105
+SSO_AUTH_SECRET = "foobar"
 
 
 def main(

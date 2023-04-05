@@ -19,7 +19,7 @@ from sso.ssotypes import Audience, Base64EncodedToken
 @dataclass
 class TokenContext:
     user: User
-    audience: Audience
+    audience: Audience = None
     algorithm: str = JWT_ALGORITHM
     issuer: str = JWT_ISSUER
     private_key: Jwk = field(default_factory=get_private_key)
@@ -29,7 +29,7 @@ class TokenContext:
     def create_tokens(self) -> tuple[SignedJwt, SignedJwt]:
         signer = JwtSigner(
             alg=self.algorithm,
-            issuer=self.issuer,
+            issuer=f"{self.issuer}/tenant/{self.user.tenant.id}",
             jwk=self.private_key,
         )
         extra_headers = {"kid": self.private_key.public_jwk().thumbprint()}

@@ -5,12 +5,13 @@ import uuid
 
 from fastapi_sqlalchemy import db
 from jwskate import JwsCompact
-from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, Text
+from sqlalchemy import Boolean, Column, DateTime, Enum, ForeignKey, Integer, Text
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy.orm import DeclarativeBase, Mapped, relationship, validates
 
 from sso.exceptions import UnauthorizedError
-from sso.keys import get_public_key
+from sso.keys import Algorithm, get_public_key
+from sso.passwordutils import hash_password
 
 UUIDType = Text(length=36)
 
@@ -23,6 +24,38 @@ class Base(DeclarativeBase):
     pass
 
 
+class Tenant(Base):
+    __tablename__ = "tenant"
+
+    id = Column(UUIDType, default=generate_uuid4, primary_key=True)  # noqa: A003
+
+    name = Column(Text, unique=True, index=True)
+
+    clients: Mapped[list["Client"]] = relationship(back_populates="tenant")
+    users: Mapped[list["User"]] = relationship(back_populates="tenant")
+
+    public_key_path = Column(Text)
+    private_key_path = Column(Text)
+    algorithm = Column(Enum(Algorithm))
+    password_salt = Column(Text)
+
+
+class Client(Base):
+    """A Client that can be logged into."""
+
+    __tablename__ = "client"
+
+    id = Column(UUIDType, default=generate_uuid4, primary_key=True)  # noqa: A003
+
+    name = Column(Text, unique=True, index=True)
+
+    tenant_id = Column(UUIDType, ForeignKey("tenant.id"))
+
+    tenant: Mapped[Tenant] = relationship(back_populates="clients")
+
+    secret = Column(Text)
+
+
 class User(Base):
     """A user of the system."""
 
@@ -32,10 +65,11 @@ class User(Base):
     email = Column(Text, unique=True, index=True)
     hashed_password = Column(Text)
     is_active = Column(Boolean, default=True)
-    applications: Mapped[list["Application"]] = relationship(back_populates="user")
     refresh_token_expirations: Mapped[list["RefreshTokenExpiration"]] = relationship(
         back_populates="user",
     )
+    tenant_id = Column(UUIDType, ForeignKey("tenant.id"))
+    tenant: Mapped[Tenant] = relationship(back_populates="users")
 
     @validates("email")
     def validate_email(self, key: str, address: str) -> str:
@@ -45,18 +79,17 @@ class User(Base):
 
     @classmethod
     def try_password_login(
-        cls,
-        *,
-        email: str,
-        hashed_password: str,
-        audience: str,
+            cls,
+            *,
+            email: str,
+            password: str,
+            tenant: Tenant,
     ) -> "User":
+        hashed_password = hash_password(password, tenant.password_salt)
         try:
             user = (
                 db.session.query(User)
                 .filter_by(email=email, hashed_password=hashed_password, is_active=True)
-                .join(Application)
-                .filter(Application.name == audience)
                 .one()
             )
         except NoResultFound:
@@ -66,9 +99,9 @@ class User(Base):
 
     @classmethod
     def try_refresh_token_login(
-        cls,
-        insecure_token_payload: str,
-        audience: str,
+            cls,
+            insecure_token_payload: str,
+            audience: str,
     ) -> "User":
         jws = JwsCompact(insecure_token_payload)
         if not jws.verify_signature(get_public_key()):
@@ -79,8 +112,6 @@ class User(Base):
             refresh_token_expiration = (
                 db.session.query(RefreshTokenExpiration)
                 .filter_by(id=payload["jti"])
-                .join(Application)
-                .filter(Application.name == audience)
                 .one()
             )
         except NoResultFound:
@@ -94,17 +125,6 @@ class User(Base):
         db.session.commit()
 
         return user
-
-
-class Application(Base):
-    """An application that a user can log into."""
-
-    __tablename__ = "application"
-
-    id = Column(UUIDType, default=generate_uuid4, primary_key=True)  # noqa: A003
-    name = Column(Text, index=True)
-    user_id = Column(UUIDType, ForeignKey("users.id"))
-    user: Mapped["User"] = relationship(back_populates="applications")
 
 
 class RefreshTokenExpiration(Base):

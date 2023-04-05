@@ -9,8 +9,8 @@ from starlette.testclient import TestClient
 
 from sso import models
 from sso.app import app as fast_api_app
-from sso.endpoints.hashutils import hash_password
-from sso.models import Application, User
+from sso.models import User
+from sso.passwordutils import hash_password
 from sso.settings import DB_URL
 
 
@@ -34,8 +34,7 @@ def setup_database(connection: Connection) -> Iterator[None]:
 
 def seed_database() -> None:
     with db() as db1:
-        db_user = User(email="bob@example.com", hashed_password=hash_password("secret"))
-        db_user.applications.append(Application(name="app"))
+        db_user = User(email="bob@example.com", hashed_password=hash_password("secret", b"salt"))
         db1.session.add(db_user)
         db1.session.commit()
 

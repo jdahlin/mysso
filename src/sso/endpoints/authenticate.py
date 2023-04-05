@@ -3,6 +3,7 @@ from pydantic import BaseModel
 
 from sso.app import app
 from sso.models import User
+from sso.passwordutils import hash_password
 from sso.ssotypes import Audience, Base64EncodedToken, Email, PasswordHashedInSha256
 from sso.tokens import TokenContext, TokenPairResponse
 
@@ -13,12 +14,13 @@ class AuthenticateRequest(BaseModel):
     audience: Audience
 
 
-@app.post("/authenticate")
-def authenticate(body: AuthenticateRequest) -> TokenPairResponse:
+@app.post("/<tenant_id:str>/authenticate")
+def authenticate(tenant_id: str, body: AuthenticateRequest) -> TokenPairResponse:
     """This endpoint is used to obtain an access token and a refresh token."""
+    tenant = ...
     user = User.try_password_login(
         email=body.email,
-        hashed_password=body.hashed_password,
+        hashed_password=hash_password(body.hashed_password, tenant.password_salt),
         audience=body.audience,
     )
 

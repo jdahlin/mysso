@@ -40,7 +40,6 @@ app.add_middleware(GZipMiddleware, minimum_size=1000)
 async def startup_event() -> None:
     """Start FastAPI and dynamically load endpoint modules."""
     python_files = list((Path(__file__).parent / "endpoints").glob("*.py"))
-    print("PYTHON", python_files)
     for file in python_files:
         importlib.import_module(f"sso.endpoints.{file.stem}")
     logger.warning(f"Note:     Loaded {len(python_files)} endpoints")
