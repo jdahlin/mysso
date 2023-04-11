@@ -19,18 +19,22 @@ TODO:
 * Investigate authlib
 * Better test coverage
 * sqladmin or port over to django-admin
-* OpenID Providers (via python-social?)
 * SAML
 * Write documentation and tutorial
 * JavaScript example
 * Docker compose file
 * Require PostgreSQL instead of SQLite
-* Secret Storage (AWS KMS, GCP KMS, Azure Key Vault, Hashicorp Vault, etc.)
 * MFA (OTP, U2F, etc.)
 * WebAuthn
 * OAuth2 Client Credentials Flow
 * OAuth2 Resource Owner Password Credentials Flow
 * OAuth2 Implicit Flow
+
+Integrations:
+* OpenID Providers (via python-social?)
+* Secret Storage (AWS KMS, GCP KMS, Azure Key Vault, Hashicorp Vault, etc.)
+* SMS provider integration (e.g. AWS SNS, Twilio, GCP SMS, Azure SMS, etc.)
+* Transactional email service providers (e.g django-anymail)
 
 Demo/Tutorial 
 ====
