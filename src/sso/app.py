@@ -1,3 +1,4 @@
+import http
 import importlib
 import logging
 from pathlib import Path
@@ -10,16 +11,17 @@ from starlette.middleware.gzip import GZipMiddleware
 from starlette.requests import Request
 from starlette.responses import JSONResponse
 
-from sso.exceptions import ServiceError
+from sso.exceptions import OAuth2Error, ServiceError
 from sso.settings import DB_URL
 
 logger = logging.getLogger(__name__)
 
 
 ServiceErrorSubclass = NewType("ServiceErrorSubclass", ServiceError)
+OAuth2ErrorSubclass = NewType("OAuth2ErrorSubclass", OAuth2Error)
 
 
-async def unicorn_exception_handler(
+async def service_error_handler(
     request: Request,
     exc: ServiceErrorSubclass,
 ) -> JSONResponse:
@@ -30,8 +32,22 @@ async def unicorn_exception_handler(
     )
 
 
-app = FastAPI(exception_handlers={ServiceError: unicorn_exception_handler})
+async def oauth2_error_handler(
+    request: Request,
+    exc: OAuth2ErrorSubclass,
+) -> JSONResponse:
+    """Handle ServiceError exceptions."""
+    return JSONResponse(status_code=http.HTTPStatus.BAD_REQUEST, content=exc.as_json())
+
+
+app = FastAPI(
+    exception_handlers={
+        ServiceError: service_error_handler,
+        OAuth2Error: oauth2_error_handler,
+    },
+)
 app.add_middleware(CORSMiddleware, allow_origins=["*"])
+logger.warning(f"Note:     Using database at {DB_URL}")
 app.add_middleware(DBSessionMiddleware, db_url=DB_URL)
 app.add_middleware(GZipMiddleware, minimum_size=1000)
 

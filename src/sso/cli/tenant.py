@@ -1,10 +1,9 @@
-import bcrypt
 import typer
 from rich.console import Console
 from rich.table import Table
 
 from sso.cli.helpers import get_db
-from sso.keys import Algorithm, create_key_pair, key_dir
+from sso.keys import JwsAlgorithm, key_dir
 from sso.models import Tenant
 
 app = typer.Typer()
@@ -12,18 +11,16 @@ console = Console()
 
 
 @app.command("create")
-def create_tenant(name: str, algorithm: Algorithm = Algorithm.ES256,
-                  salt_rounds: int = 12) -> None:
+def create_tenant(
+    name: str,
+    algorithm: JwsAlgorithm = JwsAlgorithm.RS256,
+) -> None:
     with get_db() as session:
         if session.query(Tenant).filter_by(name=name).count():
             raise KeyError(f"Tenant: {name} already exists.")
-        public_key, private_key = create_key_pair(basename=name, algorithm=algorithm)
-        tenant = Tenant(
+        tenant = Tenant.create_example(
             name=name,
-            public_key_path=str(public_key.path),
-            private_key_path=str(private_key.path),
             algorithm=algorithm,
-            password_salt=bcrypt.gensalt(salt_rounds),
         )
         session.add(tenant)
         session.commit()
@@ -42,14 +39,14 @@ def list_tenants() -> None:
         for tenant in session.query(Tenant).all():
             tenants.append(tenant)
 
-    table = Table("ID", "Name", "Algorithm", "Public Key", "Private Key", "Salt")
+    table = Table("ID", "Name", "Algorithm", "Public Key", "Private Key")
     for tenant in tenants:
-        table.add_row(tenant.id,
-                      tenant.name,
-                      tenant.algorithm,
-                      tenant.public_key_path[bdirlen:],
-                      tenant.private_key_path[bdirlen:],
-                      tenant.password_salt.decode(),
+        table.add_row(
+            tenant.id,
+            tenant.name,
+            tenant.algorithm,
+            tenant.public_key_path[bdirlen:],
+            tenant.private_key_path[bdirlen:],
         )
     console.print(table)
 

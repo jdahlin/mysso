@@ -11,6 +11,5 @@ main_app.add_typer(user.app, name="user")
 main_app.add_typer(tenant.app, name="tenant")
 
 
-
 if __name__ == "__main__":
     main_app()

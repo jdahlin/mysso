@@ -21,6 +21,7 @@ dynamic = ["version"]
 dependencies = [
     "fastapi",
     "FastAPI-SQLAlchemy",
+    "passlib[argon2,bcrypt]",
     "SQLAlchemy",
     "jwskate",
     "typer",
@@ -34,7 +35,7 @@ path = "src/sso/__version__.py"
 appservice = ["Flask", "pyjwt"]
 appclient = ["requests", "requests-auth", "typer"]
 lint = ["black", "ruff"]
-types = ["mypy"]
+types = ["mypy", "types-passlib"]
 test = ["pytest"]
 dev = ["sso[lint,types,test]"]
 
@@ -43,7 +44,7 @@ Source = "https://github.com/jdahlin/sso"
 Tracker = "https://github.com/jdahlin/sso/issues"
 
 [project.scripts]
-ssotool = "sso.cli:main"
+ssotool = "sso.cli.main:main_app"
 
 [tool.ruff]
 src = ["src"]
@@ -93,14 +94,18 @@ select = [
 ]
 ignore = [
   "ANN101",
-  "ANN102"
+  "ANN102",
+  "S101"  # assert is useful for mypy
 ]
 
 [tool.ruff.per-file-ignores]
-"*/test_*.py" = ["S101"]
-"src/sso/endpoints/oauth2_authorize.py" = ["PLR0913"]
-"src/sso/cli/*.py" = ["B008"]
 "src/application-client/*.py" = ["S105", "S106"]
+"src/sso/cli/*.py" = ["B008"]
+"src/sso/endpoints/oauth2_authorize.py" = ["PLR0913"]
+"src/sso/endpoints/oauth2_token.py" = ["B008", "PLR0913"]
+"src/sso/settings.py" = ["S105"]
+"*/test_*.py" = ["S101"]
+
 [tool.mypy]
 mypy_path = "src"
 python_version = "3.11"
@@ -113,9 +118,15 @@ show_error_context = true
 pretty = true
 
 [[tool.mypy.overrides]]
-module = ["requests_auth"]
+module = [
+  "authlib.integrations.flask_client",
+  "requests_auth",
+]
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 env = ["TESTING=1"]
-filterwarnings = ["ignore::DeprecationWarning:certifi.core:"]
+filterwarnings = [
+  "ignore::DeprecationWarning:certifi.core:",
+  "ignore::DeprecationWarning:passlib.utils:",
+]

@@ -12,9 +12,11 @@ console = Console()
 
 
 @app.command("create")
-def create_client(name: str = typer.Option(..., prompt=True),
-                  secret: str = None,
-                  tenant_name: str = TenantOption) -> int | None:
+def create_client(
+    name: str = typer.Option(..., prompt=True),
+    secret: str = typer.Option(None, prompt=True, hide_input=True),
+    tenant_name: str = TenantOption,
+) -> int | None:
     """Add an application to a user."""
     with get_db() as session:
         if secret is None:
@@ -23,11 +25,10 @@ def create_client(name: str = typer.Option(..., prompt=True),
         if session.query(Client).filter_by(name=name, tenant=tenant).count():
             typer.echo(f"Client: {name!r} already exists.")
             return 2
-        client = Client(name=name,
-                        secret=secret,
-                        tenant=tenant)
+        client = Client(name=name, secret=secret, tenant=tenant)
         session.add(client)
         session.commit()
+    return None
 
 
 @app.command("delete")
@@ -48,13 +49,13 @@ def delete_client(client_name: str, tenant_name: str = TenantOption) -> None:
 def list_clients(tenant_name: str = TenantOption) -> None:
     table = Table("ID", "Name", "Secret", "Tenant")
     with get_db() as session:
-        for client in (session.query(Client)
-                .join(Tenant)
-                .filter(Tenant.name == tenant_name)
-                .all()):
-            table.add_row(client.id,
-                          client.name,
-                          client.secret,
-                          client.tenant.name,
+        for client in (
+            session.query(Client).join(Tenant).filter(Tenant.name == tenant_name).all()
+        ):
+            table.add_row(
+                client.id,
+                client.name,
+                client.secret,
+                client.tenant.name,
             )
     console.print(table)

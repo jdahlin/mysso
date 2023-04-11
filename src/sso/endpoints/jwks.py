@@ -4,7 +4,7 @@ from pydantic import BaseModel
 from starlette.responses import Response
 
 from sso.app import app
-from sso.keys import get_public_key
+from sso.models import Tenant
 
 
 class JWKSItem(TypedDict):
@@ -21,9 +21,10 @@ class JWKSResponse(BaseModel):
     keys: list[JWKSItem]
 
 
-@app.get("/.well-known/jwks.json")
-def jwks_json(response: Response) -> JWKSResponse:
-    jwk_set = get_public_key().as_jwks()
+@app.get("/tenant/{tenant_id:str}.well-known/jwks.json")
+def jwks_json(tenant_id: str, response: Response) -> JWKSResponse:
+    tenant = Tenant.get_or_404(tenant_id=tenant_id)
+    jwk_set = tenant.get_public_key().as_jwks()
     response.headers["Cache-Control"] = (
         "public, max_age=3600, " "stale-while-revalidate=3600, " "stale-if-error=3600"
     )

@@ -1,60 +1,74 @@
 """Token creation and validation."""
-from dataclasses import dataclass, field
+import uuid
+from dataclasses import dataclass
 
 from fastapi_sqlalchemy import db
-from jwskate import Jwk, JwtSigner, SignedJwt
+from jwskate import Jwt, JwtSigner, SignedJwt
 from pydantic import BaseModel
 
-from sso.keys import get_private_key
-from sso.models import RefreshTokenExpiration, User
+from sso.models import PersistentToken, Tenant, User
 from sso.settings import (
     JWT_ACCESS_TOKEN_LIFETIME,
-    JWT_ALGORITHM,
-    JWT_ISSUER,
     JWT_REFRESH_TOKEN_LIFETIME,
+    OPENID_AUTHORIZATION_CODE_LIFETIME,
 )
-from sso.ssotypes import Audience, Base64EncodedToken
+from sso.ssotypes import Base64EncodedToken
 
 
 @dataclass
 class TokenContext:
-    user: User
-    audience: Audience = None
-    algorithm: str = JWT_ALGORITHM
-    issuer: str = JWT_ISSUER
-    private_key: Jwk = field(default_factory=get_private_key)
-    access_token_lifetime: int = JWT_ACCESS_TOKEN_LIFETIME
-    refresh_token_lifetime: int = JWT_REFRESH_TOKEN_LIFETIME
+    tenant: Tenant
 
-    def create_tokens(self) -> tuple[SignedJwt, SignedJwt]:
+    def create_authorization_code(
+        self,
+        user: User,
+        lifetime: int = OPENID_AUTHORIZATION_CODE_LIFETIME,
+    ) -> SignedJwt:
+        tenant = self.tenant
+        payload = {
+            "exp": Jwt.timestamp() + lifetime,
+            "iss": tenant.get_issuer(),
+            "jti": str(uuid.uuid4()),
+            "sub": user.id,
+        }
+        jwt = Jwt.sign(payload, jwk=tenant.get_private_key(), alg=tenant.algorithm)
+        self._persist_jwt(jwt=jwt, user=user)
+        return jwt
+
+    def create_tokens(
+        self,
+        user: User,
+        access_token_lifetime: int = JWT_ACCESS_TOKEN_LIFETIME,
+        refresh_token_lifetime: int = JWT_REFRESH_TOKEN_LIFETIME,
+    ) -> tuple[SignedJwt, SignedJwt]:
+        tenant = self.tenant
+        private_key = tenant.get_private_key()
         signer = JwtSigner(
-            alg=self.algorithm,
-            issuer=f"{self.issuer}/tenant/{self.user.tenant.id}",
-            jwk=self.private_key,
+            alg=tenant.algorithm,
+            issuer=tenant.get_issuer(),
+            jwk=private_key,
         )
-        extra_headers = {"kid": self.private_key.public_jwk().thumbprint()}
-        subject = str(self.user.id)
+        extra_headers = {"kid": private_key.public_jwk().thumbprint()}
+        subject = str(user.id)
         access_token = signer.sign(
-            audience=self.audience,
-            extra_claims={"email": self.user.email},
+            extra_claims={"email": user.email},
             extra_headers=extra_headers,
-            lifetime=self.access_token_lifetime,
+            lifetime=access_token_lifetime,
             subject=subject,
         )
         refresh_token = signer.sign(
             extra_headers=extra_headers,
-            lifetime=self.refresh_token_lifetime,
+            lifetime=refresh_token_lifetime,
             subject=subject,
         )
-        self.store_expiration(refresh_token=refresh_token)
+        self._persist_jwt(jwt=refresh_token, user=user)
         return access_token, refresh_token
 
-    def store_expiration(self, refresh_token: SignedJwt) -> None:
-        refresh_token_expiration = RefreshTokenExpiration(
-            id=refresh_token.jwt_token_id,
-            user=self.user,
-            expires_at=refresh_token.expires_at,
-            audience=self.audience,
+    def _persist_jwt(self, user: User, jwt: SignedJwt) -> None:
+        refresh_token_expiration = PersistentToken(
+            id=jwt.jwt_token_id,
+            user=user,
+            expires_at=jwt.expires_at,
         )
         db.session.add(refresh_token_expiration)
         db.session.commit()

@@ -2,55 +2,63 @@ import http
 from unittest import mock
 
 import httpx
-from jwskate import Jwt
-from sqlalchemy.orm import Session
+from fastapi_sqlalchemy import db
+from jwskate import SignedJwt
 from starlette.testclient import TestClient
 
 from sso.app import app
-from sso.keys import get_public_key
-from sso.models import User
-from sso.passwordutils import hash_password
+from sso.hashutils import get_password_hasher
+from sso.models import Tenant, User
+from sso.tokens import TokenContext
 
 
-def test_client_credentials(client: TestClient, session: Session) -> None:
+def test_oauth2_token(client: TestClient, tenant: Tenant) -> None:
+    hasher = get_password_hasher()
     auth = httpx.BasicAuth(
         username="bob@example.com",
-        password=hash_password("secret", "salt"),
+        password=hasher.hash_password("secret"),
     )
-    user = session.query(User).filter_by(email="bob@example.com").one()
+    user = db.session.query(User).filter_by(email="bob@example.com").one()
+
+    authorization_code = TokenContext(tenant=tenant).create_authorization_code(
+        user=user,
+    )
 
     with TestClient(app) as client:
         response = client.post(
-            "/oauth2/token",
+            f"/tenant/{tenant.id}/oauth2/token",
             auth=auth,
-            data={"grant_type": "client_credentials", "scope": "app"},
+            data={"grant_type": "authorization_code", "code": authorization_code},
         )
-        assert response.status_code == http.HTTPStatus.OK
         data = response.json()
-        access_token = Jwt(data.pop("access_token"))
+        assert response.status_code == http.HTTPStatus.OK
+        access_token = SignedJwt(data.pop("access_token"))
         assert access_token.claims == {
-            "aud": "app",
             "email": "bob@example.com",
             "exp": mock.ANY,
             "iat": mock.ANY,
-            "iss": "http://127.0.0.1:5000/",
+            "iss": tenant.get_issuer(),
             "jti": mock.ANY,
             "sub": str(user.id),
         }
         assert access_token.headers == {
-            "alg": "ES256",
-            "kid": get_public_key().thumbprint(),
+            "alg": "RS256",
+            "kid": tenant.get_public_key().thumbprint(),
         }
-        refresh_token = Jwt(data.pop("refresh_token"))
+        refresh_token = SignedJwt(data.pop("refresh_token"))
         assert refresh_token.headers == {
-            "alg": "ES256",
-            "kid": get_public_key().thumbprint(),
+            "alg": "RS256",
+            "kid": tenant.get_public_key().thumbprint(),
         }
         assert refresh_token.claims == {
             "exp": mock.ANY,
             "iat": mock.ANY,
-            "iss": "http://127.0.0.1:5000/",
+            "iss": tenant.get_issuer(),
             "jti": mock.ANY,
             "sub": str(user.id),
         }
-        assert data == {"expires_in": 60, "token_type": "bearer"}
+        assert data == {
+            "expires_in": 59,
+            "token_type": "bearer",
+            "userinfo": {"email": "bob@example.com", "id": str(user.id)},
+        }

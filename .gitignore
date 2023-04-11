@@ -144,3 +144,5 @@ cython_debug/
 # Project specific
 keys
 sql_app.db
+
+src/application-client/.credentials.json
