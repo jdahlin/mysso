@@ -8,7 +8,8 @@ from starlette.testclient import TestClient
 
 from sso.app import app
 from sso.hashutils import get_password_hasher
-from sso.models import Tenant, User
+from sso.models.tenant import Tenant
+from sso.models.user import User
 from sso.tokens import TokenContext
 
 

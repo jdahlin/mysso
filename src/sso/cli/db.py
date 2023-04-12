@@ -11,7 +11,7 @@ app = typer.Typer()
 
 @app.command()
 def create(*, drop: bool = False) -> None:
-    from sso.models import Base
+    from sso.models.base import Base
 
     with get_db() as session:
         bind = cast(Engine, session.bind)

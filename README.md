@@ -29,6 +29,8 @@ TODO:
 * OAuth2 Client Credentials Flow
 * OAuth2 Resource Owner Password Credentials Flow
 * OAuth2 Implicit Flow
+* User profile
+* User registration
 
 Integrations:
 * OpenID Providers (via python-social?)

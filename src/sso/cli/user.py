@@ -6,7 +6,8 @@ from rich.table import Table
 from sso.cli.helpers import TenantOption, get_db, get_tenant_or_exit
 from sso.exceptions import UnauthorizedError
 from sso.hashutils import get_password_hasher
-from sso.models import Tenant, User
+from sso.models.tenant import Tenant
+from sso.models.user import User
 from sso.settings import JWT_ALGORITHM
 from sso.tokens import TokenContext
 

@@ -7,10 +7,11 @@ from sqlalchemy import Connection, create_engine
 from sqlalchemy.orm import Session, scoped_session, sessionmaker
 from starlette.testclient import TestClient
 
-from sso import models
+import sso.models.base
 from sso.app import app as fast_api_app
 from sso.hashutils import get_password_hasher
-from sso.models import Tenant, User
+from sso.models.tenant import Tenant
+from sso.models.user import User
 from sso.settings import DB_URL
 
 
@@ -24,12 +25,12 @@ def connection() -> Iterator[Connection]:
 
 @pytest.fixture(scope="session")
 def setup_database(connection: Connection) -> Iterator[None]:
-    models.Base.metadata.drop_all(bind=connection)
-    models.Base.metadata.create_all(bind=connection, checkfirst=False)
+    sso.models.base.Base.metadata.drop_all(bind=connection)
+    sso.models.base.Base.metadata.create_all(bind=connection, checkfirst=False)
     DBSessionMiddleware(app=fast_api_app, db_url=connection.engine.url)
     seed_database()
     yield
-    models.Base.metadata.drop_all(bind=connection, checkfirst=False)
+    sso.models.base.Base.metadata.drop_all(bind=connection, checkfirst=False)
 
 
 def seed_database() -> None:

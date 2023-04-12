@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 
-from sso.models import User
+from sso.models.user import User
 
 
 def test_get_user(session: Session) -> None:

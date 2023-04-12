@@ -5,7 +5,8 @@ from rich.console import Console
 from rich.table import Table
 
 from sso.cli.helpers import TenantOption, get_db, get_tenant_or_exit
-from sso.models import Client, Tenant
+from sso.models.client import Client
+from sso.models.tenant import Tenant
 
 app = typer.Typer()
 console = Console()

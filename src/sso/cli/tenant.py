@@ -4,7 +4,7 @@ from rich.table import Table
 
 from sso.cli.helpers import get_db
 from sso.keys import JwsAlgorithm, key_dir
-from sso.models import Tenant
+from sso.models.tenant import Tenant
 
 app = typer.Typer()
 console = Console()

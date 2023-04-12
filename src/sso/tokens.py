@@ -6,7 +6,9 @@ from fastapi_sqlalchemy import db
 from jwskate import Jwt, JwtSigner, SignedJwt
 from pydantic import BaseModel
 
-from sso.models import PersistentToken, Tenant, User
+from sso.models.persistent_token import PersistentToken
+from sso.models.tenant import Tenant
+from sso.models.user import User
 from sso.settings import (
     JWT_ACCESS_TOKEN_LIFETIME,
     JWT_REFRESH_TOKEN_LIFETIME,

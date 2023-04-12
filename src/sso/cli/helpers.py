@@ -5,7 +5,7 @@ import typer
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy.orm import Session
 
-from sso.models import Tenant
+from sso.models.tenant import Tenant
 from sso.settings import SQLALCHEMY_DATABASE_URL
 
 

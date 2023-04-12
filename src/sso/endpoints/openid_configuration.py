@@ -1,7 +1,7 @@
 from typing import TypedDict, cast
 
 from sso.app import app
-from sso.models import Tenant
+from sso.models.tenant import Tenant
 
 
 # https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderMetadata

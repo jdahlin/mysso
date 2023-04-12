@@ -8,7 +8,8 @@ from starlette.responses import Response
 from sso.app import app
 from sso.endpoints.login_form import render_login_form
 from sso.exceptions import EndpointNotImplementedError
-from sso.models import Client, Tenant
+from sso.models.client import Client
+from sso.models.tenant import Tenant
 
 
 class OAuth2AuthorizeRequest(BaseModel):

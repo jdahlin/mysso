@@ -4,7 +4,7 @@ from pydantic import BaseModel
 from starlette.responses import Response
 
 from sso.app import app
-from sso.models import Tenant
+from sso.models.tenant import Tenant
 
 
 class JWKSItem(TypedDict):

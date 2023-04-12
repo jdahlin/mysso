@@ -1,7 +1,8 @@
 from starlette.responses import HTMLResponse, RedirectResponse, Response
 
 from sso.app import app
-from sso.models import Tenant, User
+from sso.models.tenant import Tenant
+from sso.models.user import User
 from sso.tokens import TokenContext
 
 

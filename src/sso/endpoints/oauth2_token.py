@@ -17,7 +17,9 @@ from sso.exceptions import (
     UnauthorizedError,
     UnsupportedGrantTypeError,
 )
-from sso.models import PersistentToken, Tenant, User
+from sso.models.persistent_token import PersistentToken
+from sso.models.tenant import Tenant
+from sso.models.user import User
 from sso.ssotypes import Base64EncodedToken, Email, PasswordHashedInSha256
 from sso.tokens import TokenContext
 
