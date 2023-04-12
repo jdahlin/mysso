@@ -15,3 +15,15 @@ def generate_uuid4() -> str:
 
 class Base(DeclarativeBase):
     pass
+
+
+def load_all_models() -> None:
+    import importlib
+    from pathlib import Path
+
+    model_files = list((Path(__file__).parent).glob("*.py"))
+    for file in model_files:
+        if file.stem in ["base", "__init__"]:
+            continue
+        print(file)
+        importlib.import_module(f"sso.models.{file.stem}")

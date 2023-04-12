@@ -14,6 +14,7 @@ from sso.keys import (
     get_private_key_from_path,
     get_public_key_from_path,
 )
+from sso.models.auth_connection import AuthConnection
 from sso.models.base import Base, UUIDType, generate_uuid4
 from sso.models.client import Client
 from sso.settings import JWT_ISSUER
@@ -29,7 +30,10 @@ class Tenant(Base):
 
     name = mapped_column(Text, unique=True, index=True)
 
-    clients: Mapped[list["Client"]] = relationship(back_populates="tenant")
+    auth_connections: Mapped[list[AuthConnection]] = relationship(
+        back_populates="tenant",
+    )
+    clients: Mapped[list[Client]] = relationship(back_populates="tenant")
     users: Mapped[list["User"]] = relationship(back_populates="tenant")
 
     public_key_path = mapped_column(Text)
