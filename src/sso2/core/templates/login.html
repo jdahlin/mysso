@@ -1,0 +1,55 @@
+{% extends "form_base.html" %}
+
+{% block title %}Login{% endblock %}
+
+{% block content %}
+<form action="/login" method="post">
+    {% csrf_token %}
+    <input type="hidden" name="next" value="{{ next }}">
+
+    <div class="flex flex-col mb-6">
+        <label class="mb-1 text-xs sm:text-sm tracking-wide text-gray-600" htmlFor="username">
+            Username
+        </label>
+        <div class="relative flex w-full flex-wrap items-stretch mb-3">
+          <span class="z-10 h-full leading-snug font-normal absolute text-center text-slate-300 absolute bg-transparent rounded text-base items-center justify-center w-8 pl-3 py-3">
+            <i class="fas fa-inbox"></i>
+          </span>
+          <input id="username" type="text" name="username" autocomplete="email" autofocus
+                 placeholder="Enter your email"
+                 class="px-3 py-3 placeholder-slate-300 text-slate-600 relative bg-white bg-white rounded text-sm border-0 shadow outline-lg focus:ring w-full pl-10"
+          />
+        </div>
+    </div>
+    <div class="flex flex-col mb-6">
+        <label class="mb-1 text-xs sm:text-sm tracking-wide text-gray-600" htmlFor="password">
+            Password
+        </label>
+        <div class="relative flex w-full flex-wrap items-stretch mb-3">
+          <span class="z-10 h-full leading-snug font-normal absolute text-center text-slate-300 absolute bg-transparent rounded text-base items-center justify-center w-8 pl-3 py-3">
+            <i class="fas fa-lock"></i>
+          </span>
+          <input id="password" type="password" name="password" autocomplete="current-password"
+                 placeholder="••••••••"
+                 class="px-3 py-3 placeholder-slate-300 text-slate-600 relative bg-white bg-white rounded text-sm border-0 shadow outline-lg focus:ring w-full pl-10"
+          />
+        </div>
+    </div>
+    {% if error %}
+    <div>
+        Error: {{ error }}
+    </div>
+    <br/>
+    {% endif %}
+    <div class="flex w-full">
+        <button
+                type="submit"
+                name="submit"
+                value="Login"
+                class="flex items-center justify-center focus:outline-none text-white text-sm sm:text-base bg-blue-600 hover:bg-blue-700 rounded-lg py-2 w-full transition duration-150 ease-in"
+        >
+            <span class="mr-2 uppercase">Login</span>
+        </button>
+    </div>
+</form>
+{% endblock %}

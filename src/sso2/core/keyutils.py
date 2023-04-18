@@ -4,11 +4,9 @@ import enum
 from functools import lru_cache
 from pathlib import Path
 
-from jwskate import Jwk
+from authlib.jose import JsonWebKey, RSAKey
 
-from sso.settings import JWT_ALGORITHM
-
-key_dir = Path(__file__).parent.parent.parent / "keys"
+key_dir = Path(__file__).parent.parent.parent.parent / "keys"
 
 
 class JwsAlgorithm(enum.StrEnum):
@@ -28,35 +26,36 @@ class JwsAlgorithm(enum.StrEnum):
 
 
 @lru_cache
-def get_private_key_from_path(path: str) -> Jwk:
+def get_private_key_from_path(path: str) -> RSAKey:
     """Return the private key used to sign JWTs."""
     with (key_dir / path).open() as f:
-        private_key = Jwk.from_pem_key(f.read())
-        if not private_key.is_private:
+        private_key = JsonWebKey.import_key(f.read())
+        if not private_key.private_key:
             raise AssertionError("Private key is not private")
         return private_key
 
 
 @lru_cache
-def get_public_key_from_path(path: str) -> Jwk:
+def get_public_key_from_path(path: str) -> RSAKey:
     """Return the public key used to verify JWTs."""
     with (key_dir / path).open() as f:
-        public_key = Jwk.from_pem_key(f.read())
-        if public_key.is_private:
+        public_key = JsonWebKey.import_key(f.read())
+        if public_key.private_key:
             raise AssertionError("Public key is not public")
-        return public_key.with_usage_parameters(alg=JWT_ALGORITHM, with_use=True)
+        return public_key
 
 
 @dataclasses.dataclass
 class StoredKey:
-    key: Jwk
+    key: RSAKey
     path: Path
-    public: bool = False
+    private: bool = True
 
     def write_to_path(self) -> None:
         with self.path.open("wb") as f:
-            f.write(self.key.to_pem(""))
-        permission = 420 if self.public else 384
+            f.write(self.key.as_pem(is_private=self.private))
+
+        permission = 420 if self.private else 384
         self.path.chmod(permission)
 
 
@@ -72,20 +71,22 @@ def create_key_pair(
         private_jwk = get_private_key_from_path(str(private_key_path))
         generate_new_key = False
     else:
-        private_jwk = (
-            Jwk.generate_for_alg(algorithm)
-            .with_kid_thumbprint()
-            .with_usage_parameters()
+        assert algorithm == "RS256"
+        private_jwk = JsonWebKey.generate_key(
+            kty="RSA",
+            crv_or_size=2048,
+            is_private=True,
         )
 
     private = StoredKey(
         key=private_jwk,
         path=private_key_path,
     )
+
     public = StoredKey(
-        key=private_jwk.public_jwk(),
+        key=private_jwk,
         path=key_dir / (basename + "-public_key.pem"),
-        public=True,
+        private=False,
     )
     if generate_new_key:
         private.write_to_path()
