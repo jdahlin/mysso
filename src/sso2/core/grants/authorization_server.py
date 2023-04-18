@@ -30,14 +30,19 @@ class MyAuthorizationServer(AuthorizationServer):  # type: ignore[misc]
         return cast(OAuth2Token, item)
 
     def create_authorization_response(
-        self, request: HttpRequest | None = None, grant_user: User | None = None,
+        self,
+        request: HttpRequest | None = None,
+        grant_user: User | None = None,
     ) -> HttpResponse:
         return cast(
-            HttpResponse, super().create_authorization_response(request, grant_user),
+            HttpResponse,
+            super().create_authorization_response(request, grant_user),
         )
 
     def create_endpoint_response(
-        self, name: str, request: HttpRequest | None = None,
+        self,
+        name: str,
+        request: HttpRequest | None = None,
     ) -> HttpResponse:
         return cast(HttpResponse, super().create_endpoint_response(name, request))
 

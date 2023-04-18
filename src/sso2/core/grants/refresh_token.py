@@ -6,7 +6,8 @@ from sso2.core.models.user_model import User
 
 class MyRefreshTokenGrant(RefreshTokenGrant):  # type: ignore[misc]
     def authenticate_refresh_token(
-        self, refresh_token: OAuth2Token,
+        self,
+        refresh_token: OAuth2Token,
     ) -> OAuth2Token | None:
         try:
             item = OAuth2Token.objects.get(refresh_token=refresh_token)

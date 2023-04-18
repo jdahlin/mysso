@@ -14,17 +14,18 @@ class DjangoAuthBackend(ModelBackend):
         username: str | None = None,
         password: str | None = None,
         tenant: Tenant | None = None,
-        **kwargs: dict[str, Any],
+        **kwargs: str | int | Tenant | None,
     ) -> User | None:
-        if username is None or password is None:
+        email = kwargs.pop("email")
+        if (username is None and email is None) or password is None:
             return None
-        query_filters = kwargs
+        query_filters: dict[str, Any] = kwargs
         if tenant is not None:
             query_filters["tenant"] = tenant
         try:
-            user = User.objects.get(email=username, **query_filters)
+            user = User.objects.get(email=email, **query_filters)
         except User.DoesNotExist:
-            print(f"no such user: {username} {query_filters}")
+            print(f"no such user: {email} {query_filters}")
             # Run the default password hasher once to reduce the timing
             # difference between an existing and a nonexistent user (#20760).
             User().set_password(password)

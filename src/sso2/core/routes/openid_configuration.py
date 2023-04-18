@@ -3,15 +3,22 @@ from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.urls import reverse
 from django.views.decorators.http import require_http_methods
 
+from sso2.core.models.tenant_model import Tenant
+
 
 @require_http_methods(["GET"])
-def openid_well_known_configuration(request: HttpRequest) -> HttpResponse:
+def openid_well_known_configuration(
+    request: HttpRequest, tenant_id: str,
+) -> HttpResponse:
     app_host = settings.APP_HOST
+    kwargs = {"tenant_id": Tenant.get_or_404(tenant_id=tenant_id).id}
+    authorization_endpoint = f"{app_host}{reverse('oauth-authorize', kwargs=kwargs)}"
+    token_endpoint = f"{app_host}{reverse('oauth-token', kwargs=kwargs)}"
     return JsonResponse(
         {
             "issuer": app_host,
-            "authorization_endpoint": f"{app_host}{reverse('oauth-authorize')}",
-            "token_endpoint": f"{app_host}{reverse('oauth-token')}",
+            "authorization_endpoint": authorization_endpoint,
+            "token_endpoint": token_endpoint,
             "token_endpoint_auth_methods_supported": ["client_secret_basic"],
             "token_endpoint_auth_signing_alg_values_supported": [
                 "RS512",
@@ -19,7 +26,7 @@ def openid_well_known_configuration(request: HttpRequest) -> HttpResponse:
                 "ES256",
             ],
             "userinfo_endpoint": f"{app_host}/user/me.json",
-            "jwks_uri": f"{app_host}{reverse('jwks')}",
+            "jwks_uri": f"{app_host}{reverse('jwks', kwargs=kwargs)}",
             "response_types_supported": [
                 "code",
                 "code id_token",

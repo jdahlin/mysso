@@ -53,6 +53,9 @@ class MyIntrospectionEndpoint(IntrospectionEndpoint):  # type: ignore[misc]
         }
 
     def check_permission(
-        self, token: str, client: OAuth2Client, request: OAuth2Request,
+        self,
+        token: str,
+        client: OAuth2Client,
+        request: OAuth2Request,
     ) -> bool:
         return True

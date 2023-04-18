@@ -15,14 +15,33 @@ admin.site.login = login_form  # type: ignore[assignment]
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("login", login_form, name="login"),
-    path("oauth/authorize", oauth2_authorize, name="oauth-authorize"),
-    path("oauth/introspect", oauth2_introspect, name="oauth-introspect"),
-    path("oauth/revoke", oauth2_revoke, name="oauth-revoke"),
-    path("oauth/token", oauth2_token, name="oauth-token"),
-    path("oauth/.well-known/jwks.json", openid_well_known_jwks, name="jwks"),
+    path("tenant/<str:tenant_id>/login", login_form, name="login"),
     path(
-        "oauth/.well-known/openid-configuration",
+        "tenant/<str:tenant_id>/protocol/oauth2/authorize",
+        oauth2_authorize,
+        name="oauth-authorize",
+    ),
+    path(
+        "tenant/<str:tenant_id>/protocol/oauth2/introspect",
+        oauth2_introspect,
+        name="oauth-introspect",
+    ),
+    path(
+        "tenant/<str:tenant_id>/protocol/oauth2/revoke",
+        oauth2_revoke,
+        name="oauth-revoke",
+    ),
+    path(
+        "tenant/<str:tenant_id>/protocol/oauth2/token",
+        oauth2_token, name="oauth-token",
+    ),
+    path(
+        "tenant/<str:tenant_id>/.well-known/jwks.json",
+        openid_well_known_jwks,
+        name="jwks",
+    ),
+    path(
+        "tenant/<str:tenant_id>/.well-known/openid-configuration",
         openid_well_known_configuration,
         name="openid-configuration",
     ),

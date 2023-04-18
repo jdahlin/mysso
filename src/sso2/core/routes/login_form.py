@@ -8,17 +8,25 @@ from sso2.core.types import HttpRequestWithUser
 
 
 @require_http_methods(["GET", "POST"])
-def login_form(request: HttpRequestWithUser) -> HttpResponse:
+def login_form(
+    request: HttpRequestWithUser, tenant_id: str | None = None,
+) -> HttpResponse:
+    tenant = None
+    if tenant_id is not None:
+        tenant = Tenant.get_or_404(tenant_id=tenant_id)
+
+    next_url = request.GET.get("next") or "/"
+    context = {"next": next_url, "tenant": tenant}
     if request.method == "GET":
-        return render(request, "login.html", {"next": request.GET.get("next")})
+        return render(request, "login.html", context)
 
     email = request.POST.get("username")
     password = request.POST.get("password")
-    tenant = Tenant.objects.first()
     user = authenticate(request, email=email, password=password, tenant=tenant)
     if user:
         login(request, user)
+        next_url = request.POST.get("next") or "/"
+        return redirect(next_url)
 
-        return redirect(request.POST.get("next") or "/")
-
-    return render(request, "login.html", {"error": "Invalid credentials"})
+    context["error"] = "Invalid credentials"
+    return render(request, "login.html", context)

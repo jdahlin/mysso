@@ -1,4 +1,3 @@
-
 from authlib.jose import RSAKey
 from django.conf import settings
 from django.db.models import Model, TextField
@@ -36,9 +35,12 @@ class Tenant(Model):
     @classmethod
     def get_or_404(cls, *, tenant_id: str) -> "Tenant":
         try:
-            return cls.objects.get(id=tenant_id)
-        except Tenant.DoesNotExist as e:
-            raise Http404 from e
+            return cls.objects.get(pk=int(tenant_id))
+        except ValueError:
+            try:
+                return cls.objects.get(name=tenant_id)
+            except Tenant.DoesNotExist as e:
+                raise Http404 from e
 
     def get_issuer(self) -> str:
         return f"{settings.APP_HOST}/tenant/{self.id}"

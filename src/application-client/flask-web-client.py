@@ -23,7 +23,7 @@ with (Path(__file__).parent / ".credentials.json").open() as f:
 oauth = OAuth(app)
 oauth.register(
     name="mysso",
-    server_metadata_url="http://127.0.0.1:5000/oauth/.well-known/openid-configuration",
+    server_metadata_url="http://127.0.0.1:5000/tenant/master/.well-known/openid-configuration",
     client_id=client_id,
     client_secret=client_secret,
     client_kwargs={
@@ -34,18 +34,17 @@ oauth.register(
 
 
 @app.route("/")
-def homepage() -> str:
+def homepage() -> Response | str:
     user = session.get("user")
+    if not user:
+        return redirect("/login")
     return render_template_string(
         """
-{% if user %}
 <pre>
 {{ user|tojson }}
 </pre>
 <a href="/logout">logout</a>
-{% else %}
-<a href="/login">login</a>
-{% endif %}""",
+""",
         user=user,
     )
 
