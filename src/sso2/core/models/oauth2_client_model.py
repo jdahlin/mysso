@@ -168,4 +168,5 @@ See <a href="https://tools.ietf.org/html/rfc7636">RFC 7636</a> for more informat
             scope="openid email profile",
             tenant=tenant,
             token_endpoint_auth_method=token_endpoint_auth_method,
+            require_nonce=False,
         )

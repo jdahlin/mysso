@@ -47,7 +47,9 @@ class MyIntrospectionEndpoint(IntrospectionEndpoint):  # type: ignore[misc]
             "scope": token.get_scope(),
             "sub": sub,
             "aud": token.client_id,
-            "iss": "https://server.example.com/",
+            "iss": OAuth2Client.objects.get(
+                client_id=token.client_id,
+            ).tenant.get_issuer(),
             "exp": token.get_expires_at(),
             "iat": token.issued_at,
         }

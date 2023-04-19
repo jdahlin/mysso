@@ -1,7 +1,6 @@
 from authlib.oauth2 import OAuth2Request
 from authlib.oidc.core import OpenIDImplicitGrant, UserInfo
 
-import sso2.conftest
 from sso2.core.models.authorization_code_model import AuthorizationCode
 from sso2.core.models.user_model import User
 from sso2.core.types import JwtConfig
@@ -16,14 +15,13 @@ class MyOpenIDImplicitGrant(OpenIDImplicitGrant):  # type: ignore[misc]
             return False
 
     def get_jwt_config(self) -> JwtConfig:
-        tenant = sso2.conftest.tenant
+        tenant = self.client.tenant
         private_key = tenant.get_private_key()
         return {
             "key": private_key.as_dict(is_private=True, alg="RS256", use="sig"),
             "alg": "RS256",
-            "iss": "https://example.com",
+            "iss": tenant.get_issuer(),
             "exp": 3600,
-            "tid": str(tenant.id),
         }
 
     def generate_user_info(self, user: User, scope: str) -> UserInfo:

@@ -45,7 +45,7 @@ class MyAuthorizationServer(AuthorizationServer):  # type: ignore[misc]
         payload = {
             # FIXME: reasonable default (issuer) and fetch from 'resource' parameter
             #  to authorize endpoint
-            "aud": None,
+            "aud": [client.client_id],
             "auth_time": now,
             "client_id": client.client_id,
             "exp": now + 3600,
@@ -53,9 +53,9 @@ class MyAuthorizationServer(AuthorizationServer):  # type: ignore[misc]
             "iat": now,
             "iss": tenant.get_issuer(),
         }
-        if user and "openid" in scope:
+        if user and scope and "openid" in scope:
             payload["sub"] = user.pk
-        return jwt.encode(header, payload, private_key)
+        return cast(str, jwt.encode(header, payload, private_key))
 
     def refresh_token_generator(
         self,

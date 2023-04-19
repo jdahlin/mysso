@@ -16,4 +16,3 @@ class JwtConfig(TypedDict):
     alg: str
     iss: str
     exp: int
-    tid: str
