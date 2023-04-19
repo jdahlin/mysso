@@ -5,8 +5,6 @@ import typer
 from requests import Session
 from requests_auth import OAuth2ClientCredentials
 
-from sso.hashutils import get_password_hasher
-
 APPLICATION_API_URL = "http://localhost:5001"
 SSO_API_URL = "http://127.0.0.1:5000"
 SSO_AUTH_EMAIL = "jdahlin@gmail.com"
@@ -24,7 +22,7 @@ def main(
     session.auth = OAuth2ClientCredentials(
         token_url=f"{sso_api_url}/oauth2/token",
         client_id=client_id,
-        client_secret=get_password_hasher().hash_password(client_secret),
+        client_secret=client_secret,
         scope=application_name,
     )
 

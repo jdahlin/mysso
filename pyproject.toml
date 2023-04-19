@@ -19,25 +19,22 @@ classifiers = [
 ]
 dynamic = ["version"]
 dependencies = [
-    "fastapi",
-    "FastAPI-SQLAlchemy",
-    "passlib[argon2,bcrypt]",
-    "SQLAlchemy",
-    "jwskate",
+    "Django>=4.2",
+    "authlib>=1.2.0",
+    "rich",
     "typer",
-    "uvicorn"
 ]
 
 [tool.hatch.version]
-path = "src/sso/__version__.py"
+path = "src/sso2/__version__.py"
 
 [project.optional-dependencies]
 appservice = ["Flask", "pyjwt"]
 appclient = ["requests", "requests-auth", "typer"]
 lint = ["black", "ruff"]
-types = ["mypy", "types-passlib"]
-test = ["pytest"]
-dev = ["sso[lint,types,test]"]
+types = ["mypy", "django-stubs", "django-stubs-ext", "types-requests"]
+test = ["pytest", "pytest-django"]
+dev = ["sso[lint,types,test,appservice,appclient]"]
 
 [project.urls]
 Source = "https://github.com/jdahlin/sso"
@@ -101,14 +98,10 @@ ignore = [
 
 [tool.ruff.per-file-ignores]
 "src/application-client/*.py" = ["S105", "S106"]
-"src/sso/cli/*.py" = ["B008"]
-"src/sso/endpoints/oauth2_authorize.py" = ["PLR0913"]
-"src/sso/endpoints/oauth2_token.py" = ["B008", "PLR0913"]
-"src/sso/settings.py" = ["S105"]
-"*/test_*.py" = ["S101"]
 "src/sso2/*/migrations/*.py" = ["E501"]
 "src/sso2/cli/*.py" = ["B008", "PLR0913"]
 "src/sso2/cli/main.py" = ["E402"]
+"*/test_*.py" = ["S101"]
 
 [tool.mypy]
 mypy_path = "./src"
@@ -144,7 +137,6 @@ module = [
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]
-env = ["TESTING=1"]
 filterwarnings = [
   "ignore::DeprecationWarning:certifi.core:",
   "ignore::DeprecationWarning:passlib.utils:",

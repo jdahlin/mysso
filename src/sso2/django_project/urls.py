@@ -33,7 +33,8 @@ urlpatterns = [
     ),
     path(
         "tenant/<str:tenant_id>/protocol/oauth2/token",
-        oauth2_token, name="oauth-token",
+        oauth2_token,
+        name="oauth-token",
     ),
     path(
         "tenant/<str:tenant_id>/.well-known/jwks.json",

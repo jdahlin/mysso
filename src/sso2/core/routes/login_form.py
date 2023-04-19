@@ -9,7 +9,8 @@ from sso2.core.types import HttpRequestWithUser
 
 @require_http_methods(["GET", "POST"])
 def login_form(
-    request: HttpRequestWithUser, tenant_id: str | None = None,
+    request: HttpRequestWithUser,
+    tenant_id: str | None = None,
 ) -> HttpResponse:
     tenant = None
     if tenant_id is not None:

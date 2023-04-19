@@ -8,7 +8,8 @@ from sso2.core.models.tenant_model import Tenant
 
 @require_http_methods(["GET"])
 def openid_well_known_configuration(
-    request: HttpRequest, tenant_id: str,
+    request: HttpRequest,
+    tenant_id: str,
 ) -> HttpResponse:
     app_host = settings.APP_HOST
     kwargs = {"tenant_id": Tenant.get_or_404(tenant_id=tenant_id).id}
