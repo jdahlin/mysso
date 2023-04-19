@@ -2,21 +2,20 @@ MySSO
 =====
 
 MySSO is a simple SSO server written in Python. It is a work in progress. 
-Requires Python 3.11, FastAPI, SQLAlchemy, passlib and jwskate.
+Requires Python 3.11, Django and authlib.
 
 Features:
 * OAuth2 and OpenID Connect (authorization code flow)
 * Simple HTML Login dialog
+* Simple Consent Screen
 * Pretty CLI for user management, client registration, etc. (via Typer)
-* argon2 and bcrypt password hashing (via passlib)
 * Multi-tenancy
-* User management (CLI only)
-* User registration (CLI only)
+* User management (CLI and Django Admin)
+* User registration (CLI and Django Admin)
 * mypy strict
 * very strict ruffness (few exceptions)
 
 TODO:
-* Investigate authlib
 * Better test coverage
 * sqladmin or port over to django-admin
 * SAML
@@ -26,11 +25,9 @@ TODO:
 * Require PostgreSQL instead of SQLite
 * MFA (OTP, U2F, etc.)
 * WebAuthn
-* OAuth2 Client Credentials Flow
-* OAuth2 Resource Owner Password Credentials Flow
-* OAuth2 Implicit Flow
 * User profile
 * User registration
+* Email verification
 
 Integrations:
 * OpenID Providers (via python-social?)
