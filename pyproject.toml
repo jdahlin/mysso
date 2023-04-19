@@ -45,7 +45,7 @@ ssotool = "sso2.cli.main:main_app"
 
 [tool.ruff]
 src = ["src"]
-line-length = 88 # black default
+line-length = 100
 select = [
   "F",     # pyflakes
   "E",     # pycodestyle (supersedes pep8)
