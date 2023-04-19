@@ -5,9 +5,17 @@ MySSO is a simple SSO server written in Python. It is a work in progress.
 Requires Python 3.11, Django and authlib.
 
 Features:
-* OAuth2 and OpenID Connect (authorization code flow)
+* OAuth2 flows (authorization code, implicit, client credentials, refresh token, password)
+* OAuth2 token introspection
+* OAuth2 token revocation
+* OAuth2 JWT Access Tokens (RFC9068)
+* OpenID Connect discovery
+* OpenID Connect nonce/PKCE
+* OpenID Connect flows (implicit and hybrid)
+* Password hashing using Argon2id
 * Simple HTML Login dialog
 * Simple Consent Screen
+* Django Admin for Clients/Users/Authorization Codes and Tokens
 * Pretty CLI for user management, client registration, etc. (via Typer)
 * Multi-tenancy
 * User management (CLI and Django Admin)
@@ -17,12 +25,9 @@ Features:
 
 TODO:
 * Better test coverage
-* sqladmin or port over to django-admin
 * SAML
 * Write documentation and tutorial
-* JavaScript example
 * Docker compose file
-* Require PostgreSQL instead of SQLite
 * MFA (OTP, U2F, etc.)
 * WebAuthn
 * User profile
