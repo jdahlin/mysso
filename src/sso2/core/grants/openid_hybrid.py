@@ -1,6 +1,7 @@
 from authlib.oauth2 import OAuth2Request
 from authlib.oidc.core import OpenIDHybridGrant, UserInfo
 
+import sso2.conftest
 from sso2.core.models.authorization_code_model import AuthorizationCode
 from sso2.core.models.user_model import User
 from sso2.core.types import JwtConfig
@@ -34,7 +35,7 @@ class MyOpenIDHybridGrant(OpenIDHybridGrant):  # type: ignore[misc]
             return False
 
     def get_jwt_config(self) -> JwtConfig:
-        tenant = self.request.client.tenant
+        tenant = sso2.conftest.tenant
         private_key = tenant.get_private_key()
         return {
             "key": private_key.as_dict(is_private=True, alg="RS512", use="sig"),

@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "sso"
+name = "sso2"
 description = 'Simple Single-Sign On Web Application.'
 readme = "README.md"
 requires-python = ">=3.11"
@@ -19,7 +19,7 @@ classifiers = [
 ]
 dynamic = ["version"]
 dependencies = [
-    "Django>=4.2",
+    "Django[argon2]>=4.2",
     "authlib>=1.2.0",
     "rich",
     "typer",
@@ -98,9 +98,11 @@ ignore = [
 
 [tool.ruff.per-file-ignores]
 "src/application-client/*.py" = ["S105", "S106"]
+"src/sso2/conftest.py" = ["S106"]
 "src/sso2/*/migrations/*.py" = ["E501"]
 "src/sso2/cli/*.py" = ["B008", "PLR0913"]
 "src/sso2/cli/main.py" = ["E402"]
+"src/sso2/django_project/settings/*.py" = ["F403"]
 "*/test_*.py" = ["S101"]
 
 [tool.mypy]
@@ -116,7 +118,7 @@ pretty = true
 plugins = ["mypy_django_plugin.main"]
 
 [tool.django-stubs]
-django_settings_module = "sso2.django_project.settings"
+django_settings_module = "sso2.django_project.settings.test"
 
 [[tool.mypy.overrides]]
 module = [
@@ -141,3 +143,5 @@ filterwarnings = [
   "ignore::DeprecationWarning:certifi.core:",
   "ignore::DeprecationWarning:passlib.utils:",
 ]
+DJANGO_SETTINGS_MODULE = "sso2.django_project.settings.test"
+addopts = "--create-db --no-migrations"

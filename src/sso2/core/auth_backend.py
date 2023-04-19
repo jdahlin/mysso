@@ -16,7 +16,7 @@ class DjangoAuthBackend(ModelBackend):
         tenant: Tenant | None = None,
         **kwargs: str | int | Tenant | None,
     ) -> User | None:
-        email = kwargs.pop("email")
+        email = kwargs.pop("email", None)
         if (username is None and email is None) or password is None:
             return None
         query_filters: dict[str, Any] = kwargs
@@ -30,7 +30,6 @@ class DjangoAuthBackend(ModelBackend):
             # difference between an existing and a nonexistent user (#20760).
             User().set_password(password)
         else:
-            print(user)
             if user.check_password(password) and self.user_can_authenticate(user):
                 return user
         return None

@@ -30,6 +30,7 @@ SECRET_KEY = get_test_secret()
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+
 ALLOWED_HOSTS: list[str] = []
 
 
@@ -140,3 +141,4 @@ AUTH_USER_MODEL = "core.User"
 AUTHENTICATION_BACKENDS = [
     "sso2.core.auth_backend.DjangoAuthBackend",
 ]
+TESTING = False

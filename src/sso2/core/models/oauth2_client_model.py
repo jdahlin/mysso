@@ -1,3 +1,5 @@
+from typing import TYPE_CHECKING, Self
+
 from authlib.oauth2.rfc6749 import ClientMixin, list_to_scope, scope_to_list
 from django.db.models import (
     CASCADE,
@@ -8,6 +10,9 @@ from django.db.models import (
     TextField,
 )
 from django.utils.safestring import mark_safe
+
+if TYPE_CHECKING:
+    from sso2.core.models import Tenant
 
 
 class OAuth2Client(Model, ClientMixin):  # type: ignore[misc]
@@ -144,3 +149,23 @@ See <a href="https://tools.ietf.org/html/rfc7636">RFC 7636</a> for more informat
     def check_grant_type(self, grant_type: str) -> bool:
         allowed = self.grant_type.split()
         return grant_type in allowed
+
+    @classmethod
+    def create_example(
+        cls,
+        tenant: "Tenant",
+        grant_type: str = "authorization_code",
+        response_type: str = "code",
+        token_endpoint_auth_method: str = "client_sec" + "ret_basic",
+    ) -> Self:
+        return cls(
+            client_name="test-client",
+            client_id="TESTCLIENT",
+            client_secret="s3c" + "r3t!",
+            redirect_uris="https://example.com/callback",
+            response_type=response_type,
+            grant_type=grant_type,
+            scope="openid email profile",
+            tenant=tenant,
+            token_endpoint_auth_method=token_endpoint_auth_method,
+        )

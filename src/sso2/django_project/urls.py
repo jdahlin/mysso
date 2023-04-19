@@ -19,22 +19,22 @@ urlpatterns = [
     path(
         "tenant/<str:tenant_id>/protocol/oauth2/authorize",
         oauth2_authorize,
-        name="oauth-authorize",
+        name="oauth2-authorize",
     ),
     path(
         "tenant/<str:tenant_id>/protocol/oauth2/introspect",
         oauth2_introspect,
-        name="oauth-introspect",
+        name="oauth2-introspect",
     ),
     path(
         "tenant/<str:tenant_id>/protocol/oauth2/revoke",
         oauth2_revoke,
-        name="oauth-revoke",
+        name="oauth2-revoke",
     ),
     path(
         "tenant/<str:tenant_id>/protocol/oauth2/token",
         oauth2_token,
-        name="oauth-token",
+        name="oauth2-token",
     ),
     path(
         "tenant/<str:tenant_id>/.well-known/jwks.json",

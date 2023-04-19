@@ -36,7 +36,7 @@ class Tenant(Model):
     def get_or_404(cls, *, tenant_id: str) -> "Tenant":
         try:
             return cls.objects.get(pk=int(tenant_id))
-        except ValueError:
+        except Tenant.DoesNotExist:
             try:
                 return cls.objects.get(name=tenant_id)
             except Tenant.DoesNotExist as e:

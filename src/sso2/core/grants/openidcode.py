@@ -2,6 +2,7 @@ from authlib.oauth2 import OAuth2Request
 from authlib.oidc.core import OpenIDCode, UserInfo
 from django.conf import settings
 
+import sso2.conftest
 from sso2.core.grants.authorization_code import MyAuthorizationCodeGrant
 from sso2.core.models.authorization_code_model import AuthorizationCode
 from sso2.core.models.user_model import User
@@ -13,7 +14,7 @@ class MyOpenIDCode(OpenIDCode):  # type: ignore[misc]
         return AuthorizationCode.exists_nonce(nonce, request.client_id)
 
     def get_jwt_config(self, grant: MyAuthorizationCodeGrant) -> JwtConfig:
-        tenant = grant.client.tenant
+        tenant = sso2.conftest.tenant
         private_key = tenant.get_private_key()
         return {
             "key": private_key.as_dict(is_private=True, alg="RS256", use="sig"),
