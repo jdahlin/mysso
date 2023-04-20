@@ -1,6 +1,5 @@
 from authlib.oauth2 import OAuth2Request
 from authlib.oidc.core import OpenIDCode, UserInfo
-from django.conf import settings
 
 from sso2.core.grants.authorization_code import MyAuthorizationCodeGrant
 from sso2.core.models.authorization_code_model import AuthorizationCode
@@ -18,7 +17,7 @@ class MyOpenIDCode(OpenIDCode):  # type: ignore[misc]
         return {
             "key": private_key.as_dict(is_private=True, alg="RS256", use="sig"),
             "alg": "RS256",
-            "iss": settings.APP_HOST,
+            "iss": tenant.get_issuer(),
             "exp": 3600,
         }
 

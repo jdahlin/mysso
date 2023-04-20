@@ -18,7 +18,7 @@ Features:
 * Pretty CLI for user management, client registration, etc. (via Typer)
 * Multi-tenancy
 * User management (CLI and Django Admin)
-* User registration (CLI and Django Admin, )
+* User registration (CLI and Django Admin)
 * mypy strict
 * very strict ruffness (few exceptions)
 

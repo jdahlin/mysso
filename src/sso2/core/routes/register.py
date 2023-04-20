@@ -1,3 +1,5 @@
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError
 from django.forms import CharField, EmailField, Form, PasswordInput, TextInput
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
@@ -13,25 +15,62 @@ class SignupForm(Form):
     email = EmailField(
         widget=TextInput(
             attrs={
-                "placeholder": "Enter your mail",
+                # FIXME: Only autofocus when there is no error
                 "autofocus": "1",
                 "icon": "fa-inbox",
+                "placeholder": "Enter your mail",
             },
         ),
     )
-    username = CharField(widget=TextInput(attrs={"placeholder": "Enter your username"}))
+    username = CharField(
+        widget=TextInput(
+            attrs={"placeholder": "Enter your username", "icon": "fa-user"},
+        ),
+    )
     first_name = CharField(
-        widget=TextInput(attrs={"placeholder": "Enter your first name, e.g. John"}),
+        widget=TextInput(
+            attrs={
+                "placeholder": "Enter your first name, e.g. John",
+                "icon": "fa-signature",
+            },
+        ),
     )
     last_name = CharField(
-        widget=TextInput(attrs={"placeholder": "Enter your last name, e.g. Doe"}),
+        widget=TextInput(
+            attrs={
+                "placeholder": "Enter your last name, e.g. Doe",
+                "icon": "fa-thin fa-signature",
+            },
+        ),
     )
     password = CharField(
-        widget=PasswordInput(attrs={"placeholder": "Enter your password"}),
+        widget=PasswordInput(
+            attrs={"placeholder": "Enter your password", "icon": "fa-lock"},
+        ),
     )
     confirm_password = CharField(
-        widget=PasswordInput(attrs={"placeholder": "Confirm your password"}),
+        widget=PasswordInput(
+            attrs={"placeholder": "Confirm your password", "icon": "fa-lock"},
+        ),
     )
+
+    def clean(self) -> None:
+        cleaned_data = super().clean()
+        if cleaned_data is None:
+            return
+        data = self.cleaned_data["email"]
+        if User.objects.filter(email=data).count() > 0:
+            raise ValidationError("Email already exists")
+
+        password = cleaned_data.get("password")
+        confirm_password = cleaned_data.get("confirm_password")
+
+        if password != confirm_password:
+            raise ValidationError("password and confirm_password does not match")
+
+        if password:
+            # Run through all AUTH_PASSWORD_VALIDATORS defined in Django settings
+            validate_password(password)
 
 
 @require_http_methods(["GET", "POST"])
@@ -55,5 +94,8 @@ def register(
     else:
         form = SignupForm()
 
-    context = {"tenant": tenant, "form": form}
+    context = {
+        "action": reverse("register", kwargs={"tenant_id": tenant_id}),
+        "form": form,
+    }
     return render(request, "register.html", context)

@@ -55,7 +55,7 @@ class MyAuthorizationServer(AuthorizationServer):  # type: ignore[misc]
         }
         if user and scope and "openid" in scope:
             payload["sub"] = user.pk
-        return cast(str, jwt.encode(header, payload, private_key))
+        return str(jwt.encode(header, payload, private_key).decode())
 
     def refresh_token_generator(
         self,
