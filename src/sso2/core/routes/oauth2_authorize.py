@@ -1,3 +1,5 @@
+from urllib.parse import urljoin
+
 from django.conf import settings
 from django.contrib.auth.views import redirect_to_login
 from django.http import HttpResponse
@@ -37,7 +39,7 @@ def oauth2_authorize(request: HttpRequestWithUser, tenant_id: str) -> HttpRespon
         resolved_login_url = reverse("login", kwargs={"tenant_id": tenant.id})
         return redirect_to_login(
             next=request.build_absolute_uri(),
-            login_url=settings.APP_HOST + resolved_login_url,
+            login_url=urljoin(settings.APP_HOST, resolved_login_url),
         )
 
     if request.method == "GET":

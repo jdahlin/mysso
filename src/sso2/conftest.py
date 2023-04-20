@@ -16,12 +16,12 @@ def test_client() -> Client:
 def tenant(
     django_db_setup: None,
     django_db_blocker: _DatabaseBlocker,
-) -> Iterator[Tenant]:
+) -> Tenant:
     with django_db_blocker.unblock():
         assert Tenant.objects.count() == 0
         tenant = Tenant.create_example(name="test-tenant")
         tenant.save()
-        yield tenant
+        return tenant
 
 
 @pytest.fixture(scope="session")

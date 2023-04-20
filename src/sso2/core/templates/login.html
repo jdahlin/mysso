@@ -35,12 +35,6 @@
           />
         </div>
     </div>
-    {% if error %}
-    <div>
-        Error: {{ error }}
-    </div>
-    <br/>
-    {% endif %}
     <div class="flex w-full">
         <button
                 type="submit"
@@ -51,5 +45,8 @@
             <span class="mr-2 uppercase">Login</span>
         </button>
     </div>
+    <br>
+    If you don't have an account, click <a class="underline text-blue-600" href="/tenant/{{ tenant.id }}/register">here</a> to register.<br>
+
 </form>
 {% endblock %}

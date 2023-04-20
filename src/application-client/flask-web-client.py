@@ -23,7 +23,7 @@ with (Path(__file__).parent / ".credentials.json").open() as f:
 oauth = OAuth(app)
 oauth.register(
     name="mysso",
-    server_metadata_url="http://127.0.0.1:5000/tenant/master/.well-known/openid-configuration",
+    server_metadata_url="http://sso.lvh.me:5000/tenant/master/.well-known/openid-configuration",
     client_id=client_id,
     client_secret=client_secret,
     client_kwargs={
@@ -52,6 +52,7 @@ def homepage() -> Response | str:
 @app.route("/login")
 def login() -> Response:
     redirect_uri = url_for("auth", _external=True)
+    print("REDIRECT TO", redirect_uri)
     return cast(Response, oauth.mysso.authorize_redirect(redirect_uri))
 
 

@@ -1,3 +1,6 @@
+from urllib.parse import urljoin
+
+from django.conf import settings
 from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.urls import reverse
 from django.views.decorators.http import require_http_methods
@@ -11,15 +14,17 @@ def openid_well_known_configuration(
     tenant_id: str,
 ) -> HttpResponse:
     tenant = Tenant.get_or_404(tenant_id=tenant_id)
-    app_host = tenant.get_issuer()
+    app_host = settings.APP_HOST
+    issuer = tenant.get_issuer()
     kwargs = {"tenant_id": tenant.id}
-    authorization_endpoint = f"{app_host}{reverse('oauth-authorize', kwargs=kwargs)}"
-    token_endpoint = f"{app_host}{reverse('oauth-token', kwargs=kwargs)}"
+    authorization_endpoint = reverse("oauth2-authorize", kwargs=kwargs)
+    token_endpoint = reverse("oauth2-token", kwargs=kwargs)
+    jwks_uri = reverse("jwks", kwargs=kwargs)
     return JsonResponse(
         {
-            "issuer": app_host,
-            "authorization_endpoint": authorization_endpoint,
-            "token_endpoint": token_endpoint,
+            "issuer": issuer,
+            "authorization_endpoint": urljoin(app_host, authorization_endpoint),
+            "token_endpoint": urljoin(app_host, token_endpoint),
             "token_endpoint_auth_methods_supported": [
                 "client_secret_basic",
                 "client_secret_post",
@@ -29,7 +34,7 @@ def openid_well_known_configuration(
             "token_endpoint_auth_signing_alg_values_supported": [
                 "RS256",
             ],
-            "jwks_uri": f"{app_host}{reverse('jwks', kwargs=kwargs)}",
+            "jwks_uri": urljoin(app_host, jwks_uri),
             "response_types_supported": [
                 "code",
                 "code id_token",

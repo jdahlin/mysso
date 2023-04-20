@@ -13,13 +13,12 @@ Features:
 * OpenID Connect nonce/PKCE
 * OpenID Connect flows (implicit and hybrid)
 * Password hashing using Argon2id
-* Simple HTML Login dialog
-* Simple Consent Screen
+* Login, Signup and Content pages 
 * Django Admin for Clients/Users/Authorization Codes and Tokens
 * Pretty CLI for user management, client registration, etc. (via Typer)
 * Multi-tenancy
 * User management (CLI and Django Admin)
-* User registration (CLI and Django Admin)
+* User registration (CLI and Django Admin, )
 * mypy strict
 * very strict ruffness (few exceptions)
 
@@ -31,7 +30,6 @@ TODO:
 * MFA (OTP, U2F, etc.)
 * WebAuthn
 * User profile
-* User registration
 * Email verification
 
 Integrations:
@@ -40,7 +38,12 @@ Integrations:
 * SMS provider integration (e.g. AWS SNS, Twilio, GCP SMS, Azure SMS, etc.)
 * Transactional email service providers (e.g django-anymail)
 
-Demo/Tutorial 
+Demo Applications
+* Bank: List Transactions, Deposit, Withdrawal, Charge, Account Info
+* Shop: Purchase item, fetch information from Wallet, use in Bank API
+
+
+* Demo/Tutorial
 ====
 
 Needs Python 3.11

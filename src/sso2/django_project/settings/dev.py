@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/4.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
-
+import os
 from pathlib import Path
 
 import django_stubs_ext
@@ -17,22 +17,24 @@ import django_stubs_ext
 django_stubs_ext.monkeypatch()
 
 
-def get_test_secret() -> str:
-    return "django-insecure-)g*x8pj$3bopz8ckz+7z_e$&1ci(^a8y6yz=au3=_q6!5w@e6j"
-
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = get_test_secret()
+SECRET_KEY = os.environ.get(
+    "DJANGO_SECRET",
+    "django-insecure-)g*x8pj$3bopz8ckz+7z_e$&1ci(^a8y6yz=au3=_q6!5w@e6j",
+)
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
 
-ALLOWED_HOSTS: list[str] = []
-
+ALLOWED_HOSTS: list[str] = [
+    "sso.lvh.me",
+    "lvh.me",
+    "localhost",
+]
 
 # Application definition
 
@@ -126,7 +128,7 @@ USE_TZ = True
 STATIC_URL = "static/"
 
 STATICFILES_DIRS = [
-    BASE_DIR / "src/sso2/static",
+    BASE_DIR / "static",
 ]
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
@@ -135,7 +137,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # Our own settings
 JWT_ALGORITHM = "RS256"
-APP_HOST = "http://127.0.0.1:5000"
+APP_HOST = "http://sso.lvh.me:5000/"
 LOGIN_URL = "/login"
 AUTH_USER_MODEL = "core.User"
 AUTHENTICATION_BACKENDS = [

@@ -12,7 +12,7 @@ with (Path(__file__).parent / ".credentials.json").open() as f:
 
 client = OAuth2Client(client_id, client_secret, scope="openid email scope")
 token = client.fetch_token(
-    "http://127.0.0.1:5000/oauth/token",
+    "http://localhost:5000/oauth/token",
     username=username,
     password=password,
     grant_type="password",

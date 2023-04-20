@@ -4,7 +4,7 @@ from jwt import PyJWKClient
 
 app = Flask(__name__)
 APPLICATION_NAME = "application-service-1"
-SSO_API_URL = "http://127.0.0.1:5000/"
+SSO_API_URL = "http://localhost:5000/"
 
 jwks_client = PyJWKClient(f"{SSO_API_URL}/.well-known/jwks.json")
 jwks_client.fetch_data()
