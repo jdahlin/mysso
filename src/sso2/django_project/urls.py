@@ -9,6 +9,7 @@ from sso2.core.routes.oauth2_token import oauth2_token
 from sso2.core.routes.openid_configuration import openid_well_known_configuration
 from sso2.core.routes.openid_jwks import openid_well_known_jwks
 from sso2.core.routes.register import register
+from sso2.core.routes.verify_email import verify_email
 
 admin.autodiscover()
 admin.site.login = login_form  # type: ignore[assignment]
@@ -18,6 +19,11 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("tenant/<str:tenant_id>/login", login_form, name="login"),
     path("tenant/<str:tenant_id>/register", register, name="register"),
+    path(
+        "tenant/<str:tenant_id>/verify-email/<str:token>",
+        verify_email,
+        name="verify_email",
+    ),
     path(
         "tenant/<str:tenant_id>/protocol/oauth2/authorize",
         oauth2_authorize,
