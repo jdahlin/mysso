@@ -1,11 +1,11 @@
-from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
-from django.forms import CharField, EmailField, Form, PasswordInput, TextInput
+from django.forms import CharField, EmailField, Form, TextInput
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.views.decorators.http import require_http_methods
 
+from sso2.core.formfields import PasswordField
 from sso2.core.models import User
 from sso2.core.models.tenant_model import Tenant
 from sso2.core.types import HttpRequestWithUser
@@ -21,6 +21,7 @@ class SignupForm(Form):
                 "placeholder": "Enter your mail",
             },
         ),
+        required=True,
     )
     username = CharField(
         widget=TextInput(
@@ -43,34 +44,22 @@ class SignupForm(Form):
             },
         ),
     )
-    password = CharField(
-        widget=PasswordInput(
-            attrs={"placeholder": "Enter your password", "icon": "fa-lock"},
-        ),
-    )
-    confirm_password = CharField(
-        widget=PasswordInput(
-            attrs={"placeholder": "Confirm your password", "icon": "fa-lock"},
-        ),
-    )
+    password = PasswordField()
+    confirm_password = PasswordField(confirm=True)
 
     def clean(self) -> None:
         cleaned_data = super().clean()
         if cleaned_data is None:
             return
-        data = self.cleaned_data["email"]
-        if User.objects.filter(email=data).count() > 0:
+        email = self.cleaned_data.get("email")
+        if User.objects.filter(email=email).count() > 0:
             raise ValidationError("Email already exists")
 
         password = cleaned_data.get("password")
         confirm_password = cleaned_data.get("confirm_password")
 
-        if password != confirm_password:
+        if password != confirm_password and password and confirm_password:
             raise ValidationError("password and confirm_password does not match")
-
-        if password:
-            # Run through all AUTH_PASSWORD_VALIDATORS defined in Django settings
-            validate_password(password)
 
 
 @require_http_methods(["GET", "POST"])

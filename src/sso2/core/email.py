@@ -19,8 +19,13 @@ Please verify your email address by clicking this link:
 <a href="{url}">{url}</a>.
 """
 
+RESET_EMAIL_TEMPLATE = """
+Please reset your password by clicking this link:
+<a href="{url}">{url}</a>.
+"""
 
-def generate_email_verification_token(user: "User") -> str:
+
+def generate_email_token(user: "User") -> str:
     tenant = user.tenant
     assert tenant is not None
     private_key = tenant.get_private_key()
@@ -33,7 +38,7 @@ def generate_email_verification_token(user: "User") -> str:
         "iss": tenant.get_issuer(),
         "sub": str(user.id),
         "email": user.email,
-        "email_verified": True
+        "email_verified": True,
     }
     return str(jwt.encode(header, payload, private_key).decode())
 
@@ -61,16 +66,11 @@ def verify_email_token(*, tenant: "Tenant", token: str) -> "User":
         user = User.objects.get(pk=claims["sub"], email=claims["email"])
     except User.DoesNotExist as e:
         raise ValueError("User not found") from e
-    else:
-        if user.email_verified:
-            raise ValueError("Email already verified")
-    user.email_verified = claims['email_verified']
-    user.save()
     return user
 
 
 def send_verification_email(user: "User") -> tuple[int, str]:
-    token = generate_email_verification_token(user)
+    token = generate_email_token(user)
     assert user.tenant
     url = urljoin(
         settings.APP_HOST,
@@ -86,6 +86,29 @@ def send_verification_email(user: "User") -> tuple[int, str]:
         subject="Please verify your email address",
         message="Verify your email",
         html_message=VERIFY_EMAIL_TEMPLATE.format(url=url),
+        from_email=FROM_EMAIL,
+        recipient_list=[user.email],
+    )
+    return response, token
+
+
+def send_password_reset_email(user: "User") -> tuple[int, str]:
+    token = generate_email_token(user)
+    assert user.tenant
+    url = urljoin(
+        settings.APP_HOST,
+        reverse(
+            "reset_email",
+            kwargs={
+                "tenant_id": user.tenant.id,
+                "token": token,
+            },
+        ),
+    )
+    response = send_mail(
+        subject="Reset password",
+        message=f"To reset your password, please click this link: {url}",
+        html_message=RESET_EMAIL_TEMPLATE.format(url=url),
         from_email=FROM_EMAIL,
         recipient_list=[user.email],
     )

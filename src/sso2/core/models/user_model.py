@@ -1,3 +1,4 @@
+import secrets
 from typing import TYPE_CHECKING
 
 from django.contrib.auth.models import AbstractUser, UserManager
@@ -53,3 +54,10 @@ class User(AbstractUser):
     # locale
 
     updated_at = DateTimeField(auto_now=True)
+
+    def reset_password(self) -> None:
+        from sso2.core.email import send_password_reset_email
+
+        send_password_reset_email(user=self)
+        self.password = secrets.token_hex(32)
+        self.save()

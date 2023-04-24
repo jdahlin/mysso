@@ -27,15 +27,16 @@ def test_send_verification_email(
     with django_db_blocker.unblock():
         assert user.email_verified is False
         _, token = send_verification_email(user)
-        verify_email_token(tenant=tenant, token=token)
-        user.refresh_from_db()
-        assert user.email_verified is True
+        user = verify_email_token(tenant=tenant, token=token)
 
     claims = decode_email_token(tenant=tenant, token=token)
     assert dict(claims) == {
         "exp": mock.ANY,
+        "email": user.email,
+        "email_verified": True,
         "iat": mock.ANY,
         "iss": tenant.get_issuer(),
+        "nbt": mock.ANY,
         "sub": str(user.id),
     }
     url = urljoin(
@@ -46,8 +47,8 @@ def test_send_verification_email(
         mock.call(
             subject="Please verify your email address",
             message="Verify your email",
-            html_message=f"Please verify your email address by "
-            f'clicking this link: <a href="{url}"></a>',
+            html_message=f"\nPlease verify your email address by "
+            f'clicking this link:\n<a href="{url}">{url}</a>.\n',
             from_email=FROM_EMAIL,
             recipient_list=[user.email],
         ),

@@ -38,8 +38,10 @@ def user(
                 username="test-user",
                 email="test@example.com",
                 password="password",
+                tenant=tenant,
             )
-        user.tenant = tenant
+        else:
+            user.tenant = tenant
         user.save()
         yield user
 
