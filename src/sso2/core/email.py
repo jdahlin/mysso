@@ -29,8 +29,11 @@ def generate_email_verification_token(user: "User") -> str:
     payload = {
         "exp": now + 3600,
         "iat": now,
+        "nbt": now,
         "iss": tenant.get_issuer(),
         "sub": str(user.id),
+        "email": user.email,
+        "email_verified": True
     }
     return str(jwt.encode(header, payload, private_key).decode())
 
@@ -55,13 +58,13 @@ def decode_email_token(*, tenant: "Tenant", token: str) -> JWTClaims:
 def verify_email_token(*, tenant: "Tenant", token: str) -> "User":
     claims = decode_email_token(tenant=tenant, token=token)
     try:
-        user = User.objects.get(pk=claims["sub"])
+        user = User.objects.get(pk=claims["sub"], email=claims["email"])
     except User.DoesNotExist as e:
         raise ValueError("User not found") from e
     else:
         if user.email_verified:
             raise ValueError("Email already verified")
-    user.email_verified = True
+    user.email_verified = claims['email_verified']
     user.save()
     return user
 
