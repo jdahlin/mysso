@@ -98,7 +98,9 @@ AUTH_PASSWORD_VALIDATORS = [
     {
         "NAME": f"{validation}.UserAttributeSimilarityValidator",
     },
-    {"NAME": f"{validation}.MinimumLengthValidator", "OPTIONS": {"min_length": 8}},
+    {
+        "NAME": f"{validation}.MinimumLengthValidator", "OPTIONS": {"min_length": 8},
+    },
     {
         "NAME": f"{validation}.CommonPasswordValidator",
     },
@@ -134,7 +136,6 @@ STATICFILES_DIRS = [
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # Our own settings
-JWT_ALGORITHM = "RS256"
 APP_HOST = "http://sso.lvh.me:5000/"
 LOGIN_URL = "/login"
 AUTH_USER_MODEL = "core.User"
