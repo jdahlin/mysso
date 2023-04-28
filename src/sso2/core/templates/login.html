@@ -1,53 +1,121 @@
-{% extends "form_base.html" %}
+{% extends "_base.html" %}
 
-{% block title %}Login{% endblock %}
+{% load i18n %}
+{% load two_factor_tags %}
+
+{% block extra_media %}
+    {{ form.media }}
+{% endblock %}
 
 {% block content %}
-<form action="{{ request.path }}" method="post">
-    {% csrf_token %}
-    <input type="hidden" name="next" value="{{ next }}">
+    <div class="min-h-screen flex flex-col items-center justify-center bg-gray-100">
+        <div class="flex flex-col bg-white shadow-md px-4 sm:px-6 md:px-8 lg:px-10 py-8 rounded-md w-full max-w-md">
+            <h1 class="text-center text-5xl font-sans">{% block title %}{% trans "Login" %}{% endblock %}</h1>
+            <div class="mt-10">
 
-    <div class="flex flex-col mb-6">
-        <label class="mb-1 text-xs sm:text-sm tracking-wide text-gray-600" htmlFor="username">
-            Username
-        </label>
-        <div class="relative flex w-full flex-wrap items-stretch mb-3">
-          <span class="z-10 h-full leading-snug font-normal absolute text-center text-slate-300 absolute bg-transparent rounded text-base items-center justify-center w-8 pl-3 py-3">
-            <i class="fas fa-inbox"></i>
-          </span>
-          <input id="username" type="text" name="username" autocomplete="email" autofocus
-                 placeholder="Enter your email"
-                 class="px-3 py-3 placeholder-slate-300 text-slate-600 relative bg-white bg-white rounded text-sm border-0 shadow outline-lg focus:ring w-full pl-10"
-          />
+                {% if wizard.steps.current == 'auth' %}
+                    <p>{% blocktrans %}Enter your credentials.{% endblocktrans %}</p>
+                {% elif wizard.steps.current == 'token' %}
+                    <p>{{ device|as_verbose_action }}</p>
+                {% elif wizard.steps.current == 'backup' %}
+                    <p>{% blocktrans trimmed %}Use this form for entering backup tokens for logging in.
+                        These tokens have been generated for you to print and keep safe. Please
+                        enter one of these backup tokens to log in to your account.{% endblocktrans %}</p>
+                {% endif %}
+
+                <form action="" method="post">
+                    {% csrf_token %}
+                    <table class="mb-3">
+                        {{ wizard.management_form }}
+                    </table>
+                    {% for field in wizard.form %}
+                    <div class="flex flex-col mb-6">
+                        <label class="mb-1 text-xs sm:text-sm tracking-wide text-gray-600" htmlFor="{{ field.auto_id }}">
+                            {{ field.label }}
+                        </label>
+                        <div class="relative flex w-full flex-wrap items-stretch mb-3">
+                            {% if field.field.widget.attrs.icon %}
+                            <span class="z-10 h-full leading-snug font-normal absolute text-center text-slate-300 absolute bg-transparent rounded text-base items-center justify-center w-8 pl-3 py-3">
+                              <i class="fas {{ field.field.widget.attrs.icon }}"></i>
+                            </span>
+                            {% endif %}
+                            {% if field.errors %}
+                            <ul class="text-red-500 text-xs italic">
+                                {% for error in field.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                            {% endif %}
+                            <input id="{{ field.auto_id }}"
+                                   type="{{ field.field.widget.input_type }}"
+                                   name="{{ form.prefix }}-{{ field.name }}"
+                                   {% if field.value %}
+                                      value="{{ field.value }}"
+                                   {% endif %}
+                            {% for key, values in field.field.widget.attrs.items %}
+                                {{ key }}="{{ field.field.widget.attrs.placeholder }}"
+                            {% endfor %}
+                            class="px-3 py-3 placeholder-slate-300 text-slate-600 relative bg-white bg-white rounded text-sm border-0 shadow outline-lg focus:ring w-full pl-10"/>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {% if form.non_field_errors %}
+                    <ul class="text-red-500">
+                        {% for error in form.non_field_errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                    <br>
+                    {% endif %}
+
+                    {# hidden submit button to enable [enter] key #}
+                    <input type="submit" value="" hidden/>
+
+                    {% if other_devices %}
+                        <p>{% trans "Or, alternatively, use one of your other authentication methods:" %}</p>
+                        <p>
+                            {% for other in other_devices %}
+                                <button name="challenge_device" value="{{ other.persistent_id }}"
+                                        class="btn btn-secondary btn-block" type="submit">
+                                    {{ other|as_action }}
+                                </button>
+                            {% endfor %}</p>
+                    {% endif %}
+                    {% if cancel_url %}
+                        <a href="{{ cancel_url }}"
+                           class="float-right btn btn-link">{% trans "Cancel" %}</a>
+                    {% endif %}
+                    <div class="flex w-full">
+                        {% if wizard.steps.prev %}
+                            <button name="wizard_goto_step"
+                                    type="submit"
+                                    value="{{ wizard.steps.prev }}"
+                                    class="flex items-center justify-center focus:outline-none text-white text-sm sm:text-base bg-blue-600 hover:bg-blue-700 rounded-lg py-2 w-full transition duration-150 ease-in">
+                                {% trans "Back" %}
+                            </button>
+                        {% endif %}
+                        <button type="submit" class="flex items-center justify-center focus:outline-none text-white text-sm sm:text-base bg-blue-600 hover:bg-blue-700 rounded-lg py-2 w-full transition duration-150 ease-in">
+                            {% trans "Sign In" %}
+                        </button>
+                    </div>
+                </form>
+
+                {% block 'backup_tokens' %}
+                    {% if backup_tokens %}
+                        <hr>
+                        <div class="backup_tokens_form">
+                            <form action="" method="post">
+                                {% csrf_token %}
+                                <p>{% trans "As a last resort, you can use a backup token:" %}</p>
+                                <p>
+                                    <button name="wizard_goto_step" type="submit" value="backup"
+                                            class="btn btn-sm btn-secondary btn-block">{% trans "Use Backup Token" %}</button>
+                                </p>
+                            </form>
+                        </div>
+                    {% endif %}
+                {% endblock %}
+            </div>
         </div>
     </div>
-    <div class="flex flex-col mb-6">
-        <label class="mb-1 text-xs sm:text-sm tracking-wide text-gray-600" htmlFor="password">
-            Password
-        </label>
-        <div class="relative flex w-full flex-wrap items-stretch mb-3">
-          <span class="z-10 h-full leading-snug font-normal absolute text-center text-slate-300 absolute bg-transparent rounded text-base items-center justify-center w-8 pl-3 py-3">
-            <i class="fas fa-lock"></i>
-          </span>
-          <input id="password" type="password" name="password" autocomplete="current-password"
-                 placeholder="••••••••"
-                 class="px-3 py-3 placeholder-slate-300 text-slate-600 relative bg-white bg-white rounded text-sm border-0 shadow outline-lg focus:ring w-full pl-10"
-          />
-        </div>
-    </div>
-    <div class="flex w-full">
-        <button
-                type="submit"
-                name="submit"
-                value="Login"
-                class="flex items-center justify-center focus:outline-none text-white text-sm sm:text-base bg-blue-600 hover:bg-blue-700 rounded-lg py-2 w-full transition duration-150 ease-in"
-        >
-            <span class="mr-2 uppercase">Login</span>
-        </button>
-    </div>
-    <br>
-    {% if tenant %}
-    If you don't have an account, click <a class="underline text-blue-600" href="/tenant/{{ tenant.id }}/register">here</a> to register.<br>
-    {% endif %}
-</form>
 {% endblock %}

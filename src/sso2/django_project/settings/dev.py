@@ -41,6 +41,13 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django_otp",
+    "django_otp.plugins.otp_static",
+    "django_otp.plugins.otp_totp",
+    "django_otp.plugins.otp_email",
+    "two_factor",
+    "two_factor.plugins.email",
+    "two_factor.plugins.webauthn",
 ]
 
 MIDDLEWARE = [
@@ -49,6 +56,7 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django_otp.middleware.OTPMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
@@ -135,7 +143,9 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 APP_HOST = "http://sso.lvh.me:5000/"
 app_host_url = urllib.parse.urlparse(APP_HOST)
 
-LOGIN_URL = "/login"
+LOGIN_URL = "two_factor:login"
+LOGIN_REDIRECT_URL = "home"
+
 AUTH_USER_MODEL = "core.User"
 AUTHENTICATION_BACKENDS = [
     "sso2.core.auth_backend.DjangoAuthBackend",
@@ -146,3 +156,4 @@ ALLOWED_HOSTS: list[str] = [app_host_url.netloc, "localhost"]
 CSRF_TRUSTED_ORIGINS = [
     f"{app_host_url.scheme}://{app_host_url.netloc}",
 ]
+TWO_FACTOR_WEBAUTHN_RP_NAME = "MySSO"

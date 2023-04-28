@@ -1,7 +1,10 @@
 from django.contrib import admin
-from django.urls import path
+from django.contrib.auth.views import LogoutView
+from django.urls import include, path
+from two_factor.urls import urlpatterns as tf_urls
 
-from sso2.core.routes.login_form import login_form
+from sso2.core.routes.home import home
+from sso2.core.routes.login_form import NewLoginView
 from sso2.core.routes.oauth2_authorize import oauth2_authorize
 from sso2.core.routes.oauth2_introspect import oauth2_introspect
 from sso2.core.routes.oauth2_revoke import oauth2_revoke
@@ -10,16 +13,20 @@ from sso2.core.routes.openid_configuration import openid_well_known_configuratio
 from sso2.core.routes.openid_jwks import openid_well_known_jwks
 from sso2.core.routes.register import register
 from sso2.core.routes.reset_password import reset_password
+from sso2.core.routes.twofactor_setup import MFASetupView
 from sso2.core.routes.verify_email import verify_email
 
 admin.autodiscover()
-admin.site.login = login_form  # type: ignore[assignment]
 
 
 urlpatterns = [
+    path("", include(tf_urls)),
     path("admin/", admin.site.urls),
-    path("tenant/<str:tenant_id>/login", login_form, name="login"),
+    path("tenant/<str:tenant_id>/home", home, name="home"),
+    path("tenant/<str:tenant_id>/login", NewLoginView.as_view(), name="login"),
+    path("tenant/<str:tenant_id>/logout", LogoutView.as_view(), name="logout"),
     path("tenant/<str:tenant_id>/register", register, name="register"),
+    path("tenant/<str:tenant_id>/mfa-setup", MFASetupView.as_view(), name="mfa-setup"),
     path(
         "tenant/<str:tenant_id>/verify-email/<str:token>",
         verify_email,

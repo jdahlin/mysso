@@ -20,7 +20,20 @@ FORM_FIELD_OVERRIDES: Mapping[type[Field[Any, Any]], Mapping[str, Any]] = {
     TextField: {"widget": TextInput(attrs={"size": 100})},
 }
 
-admin.site.register(User, UserAdmin)
+
+class MyUserAdmin(UserAdmin):
+    UserAdmin.list_display += ("tenant_link",)  # type: ignore[operator]
+
+    @admin.display(description="Tenant")
+    def tenant_link(self, client: OAuth2Client) -> SafeString:
+        return mark_safe(
+            f'<a href="/admin/core/tenant/{client.tenant_id}/change/">'
+            f"{client.tenant.name}"
+            f"</a>",
+        )
+
+
+admin.site.register(User, MyUserAdmin)
 
 
 class OAuth2ClientAdmin(admin.ModelAdmin[OAuth2Client]):
@@ -43,7 +56,10 @@ class OAuth2ClientAdmin(admin.ModelAdmin[OAuth2Client]):
             f"</a>",
         )
 
-    def get_changeform_initial_data(self, request: HttpRequest) -> dict[str, str | list[str]]:
+    def get_changeform_initial_data(
+        self,
+        request: HttpRequest,
+    ) -> dict[str, str | list[str]]:
         return {
             "client_id": str(uuid4()),
             "client_secret": secrets.token_urlsafe(24),

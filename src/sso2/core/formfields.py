@@ -17,6 +17,7 @@ class PasswordField(CharField):
 
     def widget_attrs(self, widget: Widget) -> dict[str, Any]:
         attrs = super().widget_attrs(widget)
+        attrs["autocomplete"] = "current-password"
         attrs["icon"] = "fa-lock"
         placeholder = "Confirm your password" if self.confirm else "Enter your password"
         attrs["placeholder"] = placeholder
