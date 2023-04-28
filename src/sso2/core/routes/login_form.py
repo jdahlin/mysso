@@ -1,5 +1,6 @@
 from django.contrib.auth import authenticate
 from django.contrib.auth.forms import AuthenticationForm
+from django.core.exceptions import ValidationError
 from django.forms import CharField, PasswordInput, TextInput
 from django.shortcuts import resolve_url
 from django.urls import reverse
@@ -30,7 +31,7 @@ class NewAuthenticationForm(AuthenticationForm):
         ),
     )
 
-    def clean(self) -> dict[str, str]:
+    def clean(self) -> dict[str, str] | ValidationError:
         username = self.cleaned_data.get("username")
         password = self.cleaned_data.get("password")
         assert self.request is not None
@@ -44,7 +45,11 @@ class NewAuthenticationForm(AuthenticationForm):
                 tenant=tenant,
             )
             if self.user_cache is None:
-                raise self.get_invalid_login_error
+                return ValidationError(
+                    self.error_messages["invalid_login"],
+                    code="invalid_login",
+                    params={"username": self.username_field.verbose_name},
+                )
             else:
                 self.confirm_login_allowed(self.user_cache)
 

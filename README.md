@@ -12,8 +12,10 @@ Features:
 * OpenID Connect discovery
 * OpenID Connect nonce/PKCE
 * OpenID Connect flows (implicit and hybrid)
-* Password hashing using Argon2id
-* Login, Signup and Content pages 
+* Strong Password hashing using Argon2id
+* Login, Signup and Content pages
+* User portal
+* MFA (OTP, WebAuthn)
 * Django Admin for Clients/Users/Authorization Codes and Tokens
 * Pretty CLI for user management, client registration, etc. (via Typer)
 * Multi-tenancy
@@ -23,13 +25,13 @@ Features:
 * very strict ruffness (few exceptions)
 
 TODO:
+* Portal: Change Picture
+* Portal: Edit personal information
+* Portal: Manage MFA devices
 * Better test coverage
 * SAML
 * Write documentation and tutorial
 * Docker compose file
-* MFA (OTP, U2F, etc.)
-* WebAuthn
-* User profile
 * Email verification
 
 Integrations:
@@ -37,11 +39,6 @@ Integrations:
 * Secret Storage (AWS KMS, GCP KMS, Azure Key Vault, Hashicorp Vault, etc.)
 * SMS provider integration (e.g. AWS SNS, Twilio, GCP SMS, Azure SMS, etc.)
 * Transactional email service providers (e.g django-anymail)
-
-Demo Applications
-* Bank: List Transactions, Deposit, Withdrawal, Charge, Account Info
-* Shop: Purchase item, fetch information from Wallet, use in Bank API
-
 
 * Demo/Tutorial
 ====
