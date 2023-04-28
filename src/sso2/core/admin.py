@@ -1,12 +1,16 @@
+import secrets
 from collections.abc import Mapping
 from typing import Any
+from uuid import uuid4
 
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.db.models import Field, TextField
 from django.forms import TextInput
+from django.http import HttpRequest
 from django.utils.safestring import SafeString, mark_safe
 
+from sso2.core.models import Tenant
 from sso2.core.models.authorization_code_model import AuthorizationCode
 from sso2.core.models.oauth2_client_model import OAuth2Client
 from sso2.core.models.oauth2_token_model import OAuth2Token
@@ -16,18 +20,36 @@ FORM_FIELD_OVERRIDES: Mapping[type[Field[Any, Any]], Mapping[str, Any]] = {
     TextField: {"widget": TextInput(attrs={"size": 100})},
 }
 
+admin.site.register(User, UserAdmin)
+
 
 class OAuth2ClientAdmin(admin.ModelAdmin[OAuth2Client]):
-    list_display = ["client"]
+    list_display = ["client_link", "tenant_link"]
     formfield_overrides = FORM_FIELD_OVERRIDES
 
-    @admin.display()
-    def client(self, client: OAuth2Client) -> SafeString:
+    @admin.display(description="Client")
+    def client_link(self, client: OAuth2Client) -> SafeString:
         return mark_safe(
             f'<a href="/admin/core/oauth2client/{client.id}/change/">'
             f"{client.client_name} (#{client.id})"
             f"</a>",
         )
+
+    @admin.display(description="Tenant")
+    def tenant_link(self, client: OAuth2Client) -> SafeString:
+        return mark_safe(
+            f'<a href="/admin/core/tenant/{client.tenant_id}/change/">'
+            f"{client.tenant.name}"
+            f"</a>",
+        )
+
+    def get_changeform_initial_data(self, request: HttpRequest) -> dict[str, str | list[str]]:
+        return {
+            "client_id": str(uuid4()),
+            "client_secret": secrets.token_urlsafe(24),
+            "response_type": "code",
+            "scope": "openid email profile",
+        }
 
 
 admin.site.register(OAuth2Client, OAuth2ClientAdmin)
@@ -103,4 +125,14 @@ class AuthorizationCodeAdmin(admin.ModelAdmin[AuthorizationCode]):
 
 admin.site.register(AuthorizationCode, AuthorizationCodeAdmin)
 
-admin.site.register(User, UserAdmin)
+
+class TenantCodeAdmin(admin.ModelAdmin[Tenant]):
+    formfield_overrides = FORM_FIELD_OVERRIDES
+    list_display = [
+        "id",
+        "name",
+        "algorithm",
+    ]
+
+
+admin.site.register(Tenant, TenantCodeAdmin)

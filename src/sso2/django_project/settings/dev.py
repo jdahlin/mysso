@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 import os
+import urllib.parse
 from pathlib import Path
 
 import django_stubs_ext
@@ -29,12 +30,6 @@ SECRET_KEY = os.environ.get(
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-
-ALLOWED_HOSTS: list[str] = [
-    "sso.lvh.me",
-    "lvh.me",
-    "localhost",
-]
 
 # Application definition
 
@@ -58,7 +53,7 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-ROOT_URLCONF = "django_project.urls"
+ROOT_URLCONF = "sso2.django_project.urls"
 
 TEMPLATES = [
     {
@@ -99,7 +94,8 @@ AUTH_PASSWORD_VALIDATORS = [
         "NAME": f"{validation}.UserAttributeSimilarityValidator",
     },
     {
-        "NAME": f"{validation}.MinimumLengthValidator", "OPTIONS": {"min_length": 8},
+        "NAME": f"{validation}.MinimumLengthValidator",
+        "OPTIONS": {"min_length": 8},
     },
     {
         "NAME": f"{validation}.CommonPasswordValidator",
@@ -137,9 +133,16 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # Our own settings
 APP_HOST = "http://sso.lvh.me:5000/"
+app_host_url = urllib.parse.urlparse(APP_HOST)
+
 LOGIN_URL = "/login"
 AUTH_USER_MODEL = "core.User"
 AUTHENTICATION_BACKENDS = [
     "sso2.core.auth_backend.DjangoAuthBackend",
 ]
 TESTING = False
+
+ALLOWED_HOSTS: list[str] = [app_host_url.netloc, "localhost"]
+CSRF_TRUSTED_ORIGINS = [
+    f"{app_host_url.scheme}://{app_host_url.netloc}",
+]

@@ -52,3 +52,6 @@ class Tenant(Model):
 
     def get_public_key(self) -> RSAKey:
         return get_public_key_from_path(self.public_key_path)
+
+    def __str__(self) -> str:
+        return self.name

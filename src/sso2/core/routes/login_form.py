@@ -13,10 +13,9 @@ def login_form(
     tenant_id: str | None = None,
 ) -> HttpResponse:
     tenant = None
+    next_url = request.GET.get("next") or "/"
     if tenant_id is not None:
         tenant = Tenant.get_or_404(tenant_id=tenant_id)
-
-    next_url = request.GET.get("next") or "/"
     context = {"next": next_url, "tenant": tenant}
     if request.method == "GET":
         return render(request, "login.html", context)

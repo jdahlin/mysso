@@ -3,7 +3,7 @@
 {% block title %}Login{% endblock %}
 
 {% block content %}
-<form action="/tenant/{{ tenant.id }}/login" method="post">
+<form action="{{ request.path }}" method="post">
     {% csrf_token %}
     <input type="hidden" name="next" value="{{ next }}">
 
@@ -46,7 +46,8 @@
         </button>
     </div>
     <br>
+    {% if tenant %}
     If you don't have an account, click <a class="underline text-blue-600" href="/tenant/{{ tenant.id }}/register">here</a> to register.<br>
-
+    {% endif %}
 </form>
 {% endblock %}
