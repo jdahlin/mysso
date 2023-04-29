@@ -15,15 +15,18 @@ FORM_FIELD_OVERRIDES: Mapping[type[Field[Any, Any]], Mapping[str, Any]] = {
 }
 
 
+def build_link(name: str, href: str) -> SafeString:
+    return mark_safe(f'<a href="{href}">{name}</a>')
+
+
 class MyUserAdmin(UserAdmin):
     UserAdmin.list_display += ("tenant_link",)  # type: ignore[operator]
 
     @admin.display(description="Tenant")
     def tenant_link(self, user: User) -> SafeString:
-        return mark_safe(
-            f'<a href="/admin/core/tenant/{user.tenant_id}/change/">'
-            f"{user.tenant.name}"
-            f"</a>",
+        return build_link(
+            href=f"/admin/core/tenant/{user.tenant_id}/change/",
+            name=user.tenant.name,
         )
 
 

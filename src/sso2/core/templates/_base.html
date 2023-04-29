@@ -1,6 +1,8 @@
 {% load i18n %}
 {% url 'logout' tenant_id=tenant.id as logout_url %}
-
+{% url 'home' tenant_id=tenant.id as home_url %}
+{% url 'personal_information' tenant_id=tenant.id as personal_information_url %}
+{% url 'security' tenant_id=tenant.id as security_url %}
 <!DOCTYPE html>
 <html {% if LANGUAGE_BIDI %}dir="rtl"{% endif %}>
 <head>
@@ -27,12 +29,12 @@
                 <div class="hidden sm:ml-6 sm:block">
                     <div class="flex space-x-4">
                         <!-- Current: "bg-gray-900 text-white", Default: "text-gray-300 hover:bg-gray-700 hover:text-white" -->
-                        <a href="#" class="bg-gray-900 text-white rounded-md px-3 py-2 text-sm font-medium"
+                        <a href="{{ home_url }}" class="bg-gray-900 text-white rounded-md px-3 py-2 text-sm font-medium"
                            aria-current="page">Your Account</a>
-                        <a href="#"
+                        <a href="{{ personal_information_url }}"
                            class="text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium">Personal
                             Info</a>
-                        <a href="#"
+                        <a href="{{ security_url }}"
                            class="text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium">Security</a>
                     </div>
                 </div>

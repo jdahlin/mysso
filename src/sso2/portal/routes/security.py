@@ -11,5 +11,5 @@ from sso2.core.types import HttpRequestWithUser
 @require_http_methods(["GET"])
 def home(request: HttpRequestWithUser, tenant_id: str) -> HttpResponse:
     tenant = Tenant.get_or_404(tenant_id=tenant_id)
-    context = {"tenant": tenant}
-    return render(request, "home.html", context)
+    context = {"user": request.user, "tenant": tenant}
+    return render(request, "security.html", context)
