@@ -1,0 +1,11 @@
+[importlinter]
+root_package = sso2
+
+[importlinter:contract:1]
+name=Core modules should not import dependent modules
+type=forbidden
+source_modules=
+    sso2.core
+forbidden_modules=
+    sso2.oauth
+    sso2.portal
