@@ -4,9 +4,9 @@ from authlib.oauth2 import OAuth2Request
 from authlib.oauth2.rfc6749 import AuthorizationCodeGrant
 from authlib.oidc.core.grants.util import validate_nonce
 
-from sso2.core.models.authorization_code_model import AuthorizationCode
-from sso2.core.models.oauth2_client_model import OAuth2Client
 from sso2.core.models.user_model import User
+from sso2.oauth.models.authorization_code_model import AuthorizationCode
+from sso2.oauth.models.oauth2_client_model import OAuth2Client
 
 
 def exists_nonce(nonce: str, request: OAuth2Request) -> bool:

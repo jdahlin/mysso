@@ -126,6 +126,7 @@ django_settings_module = "sso2.django_project.settings.test"
 [[tool.mypy.overrides]]
 module = [
   "authlib.*",
+  "django_otp.*",
   "formtools.*",
   "requests_auth",
   "two_factor.*"

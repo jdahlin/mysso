@@ -3,8 +3,8 @@ from typing import TypedDict, cast
 from authlib.oauth2 import OAuth2Request
 from authlib.oauth2.rfc7662 import IntrospectionEndpoint
 
-from sso2.core.models.oauth2_client_model import OAuth2Client
-from sso2.core.models.oauth2_token_model import OAuth2Token
+from sso2.oauth.models.oauth2_client_model import OAuth2Client
+from sso2.oauth.models.oauth2_token_model import OAuth2Token
 
 
 class IntrospectedToken(TypedDict):

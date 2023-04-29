@@ -8,7 +8,9 @@ from authlib.jose import jwt
 from django.test import Client
 from django.urls import reverse
 
-from sso2.core.models import AuthorizationCode, OAuth2Client, Tenant, User
+from sso2.core.models import Tenant, User
+from sso2.oauth.models.authorization_code_model import AuthorizationCode
+from sso2.oauth.models.oauth2_client_model import OAuth2Client
 
 
 class OAuth2Flow(enum.StrEnum):

@@ -2,9 +2,9 @@ from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 
-from sso2.core.grants.authorization_server import server
 from sso2.core.models.tenant_model import Tenant
 from sso2.core.types import HttpRequestWithUser
+from sso2.oauth.grants.authorization_server import server
 
 
 @csrf_exempt

@@ -1,10 +1,10 @@
 from authlib.oauth2 import OAuth2Request
 from authlib.oidc.core import OpenIDCode, UserInfo
 
-from sso2.core.grants.authorization_code import MyAuthorizationCodeGrant
-from sso2.core.models.authorization_code_model import AuthorizationCode
 from sso2.core.models.user_model import User
 from sso2.core.types import JwtConfig
+from sso2.oauth.grants.authorization_code import MyAuthorizationCodeGrant
+from sso2.oauth.models.authorization_code_model import AuthorizationCode
 
 
 class MyOpenIDCode(OpenIDCode):  # type: ignore[misc]

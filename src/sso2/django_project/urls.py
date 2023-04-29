@@ -3,18 +3,18 @@ from django.contrib.auth.views import LogoutView
 from django.urls import include, path
 from two_factor.urls import urlpatterns as tf_urls
 
-from sso2.core.routes.home import home
 from sso2.core.routes.login_form import NewLoginView
-from sso2.core.routes.oauth2_authorize import oauth2_authorize
-from sso2.core.routes.oauth2_introspect import oauth2_introspect
-from sso2.core.routes.oauth2_revoke import oauth2_revoke
-from sso2.core.routes.oauth2_token import oauth2_token
-from sso2.core.routes.openid_configuration import openid_well_known_configuration
-from sso2.core.routes.openid_jwks import openid_well_known_jwks
 from sso2.core.routes.register import register
 from sso2.core.routes.reset_password import reset_password
 from sso2.core.routes.twofactor_setup import MFASetupView
 from sso2.core.routes.verify_email import verify_email
+from sso2.oauth.routes.oauth2_authorize import oauth2_authorize
+from sso2.oauth.routes.oauth2_introspect import oauth2_introspect
+from sso2.oauth.routes.oauth2_revoke import oauth2_revoke
+from sso2.oauth.routes.oauth2_token import oauth2_token
+from sso2.oauth.routes.openid_configuration import openid_well_known_configuration
+from sso2.oauth.routes.openid_jwks import openid_well_known_jwks
+from sso2.portal.routes.home import home
 
 admin.autodiscover()
 

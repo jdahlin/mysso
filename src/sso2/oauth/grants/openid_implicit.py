@@ -1,9 +1,9 @@
 from authlib.oauth2 import OAuth2Request
 from authlib.oidc.core import OpenIDImplicitGrant, UserInfo
 
-from sso2.core.models.authorization_code_model import AuthorizationCode
 from sso2.core.models.user_model import User
 from sso2.core.types import JwtConfig
+from sso2.oauth.models.authorization_code_model import AuthorizationCode
 
 
 class MyOpenIDImplicitGrant(OpenIDImplicitGrant):  # type: ignore[misc]

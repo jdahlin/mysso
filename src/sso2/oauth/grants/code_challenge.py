@@ -1,7 +1,7 @@
 from authlib.oauth2.rfc6749 import InvalidRequestError
 from authlib.oauth2.rfc7636 import CodeChallenge
 
-from sso2.core.grants.authorization_code import MyAuthorizationCodeGrant
+from sso2.oauth.grants.authorization_code import MyAuthorizationCodeGrant
 
 
 class MyCodeChallenge(CodeChallenge):  # type: ignore[misc]

@@ -1,7 +1,7 @@
 from authlib.oauth2.rfc6749 import RefreshTokenGrant
 
-from sso2.core.models.oauth2_token_model import OAuth2Token
 from sso2.core.models.user_model import User
+from sso2.oauth.models.oauth2_token_model import OAuth2Token
 
 
 class MyRefreshTokenGrant(RefreshTokenGrant):  # type: ignore[misc]

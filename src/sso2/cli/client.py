@@ -6,7 +6,7 @@ from rich.console import Console
 from rich.table import Table
 
 from sso2.cli.helpers import TenantOption, get_tenant_or_exit
-from sso2.core.models.oauth2_client_model import OAuth2Client
+from sso2.oauth.models.oauth2_client_model import OAuth2Client
 
 app = typer.Typer()
 console = Console()

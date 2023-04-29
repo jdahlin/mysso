@@ -31,7 +31,7 @@ class NewAuthenticationForm(AuthenticationForm):
         ),
     )
 
-    def clean(self) -> dict[str, str] | ValidationError:
+    def clean(self) -> dict[str, str]:
         username = self.cleaned_data.get("username")
         password = self.cleaned_data.get("password")
         assert self.request is not None
@@ -39,13 +39,13 @@ class NewAuthenticationForm(AuthenticationForm):
         tenant = Tenant.get_or_404(tenant_id=tenant_id)
         if username is not None and password:
             self.user_cache = authenticate(
-                self.request,
+                request=self.request,
                 username=username,
                 password=password,
                 tenant=tenant,
             )
             if self.user_cache is None:
-                return ValidationError(
+                raise ValidationError(
                     self.error_messages["invalid_login"],
                     code="invalid_login",
                     params={"username": self.username_field.verbose_name},

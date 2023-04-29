@@ -4,7 +4,8 @@ import pytest
 from django.test import Client
 from pytest_django.plugin import _DatabaseBlocker
 
-from sso2.core.models import OAuth2Client, Tenant, User
+from sso2.core.models import Tenant, User
+from sso2.oauth.models.oauth2_client_model import OAuth2Client
 
 
 @pytest.fixture

@@ -12,17 +12,17 @@ from authlib.oauth2.rfc6749 import ClientCredentialsGrant, ImplicitGrant
 from authlib.oauth2.rfc6750 import BearerTokenGenerator
 from django.http import HttpRequest, HttpResponse
 
-from sso2.core.grants.authorization_code import MyAuthorizationCodeGrant
-from sso2.core.grants.code_challenge import MyCodeChallenge
-from sso2.core.grants.introspection_endpoint import MyIntrospectionEndpoint
-from sso2.core.grants.openid_hybrid import MyOpenIDHybridGrant
-from sso2.core.grants.openid_implicit import MyOpenIDImplicitGrant
-from sso2.core.grants.openidcode import MyOpenIDCode
-from sso2.core.grants.password import MyPasswordGrant
-from sso2.core.grants.refresh_token import MyRefreshTokenGrant
-from sso2.core.models.oauth2_client_model import OAuth2Client
-from sso2.core.models.oauth2_token_model import OAuth2Token
 from sso2.core.models.user_model import User
+from sso2.oauth.grants.authorization_code import MyAuthorizationCodeGrant
+from sso2.oauth.grants.code_challenge import MyCodeChallenge
+from sso2.oauth.grants.introspection_endpoint import MyIntrospectionEndpoint
+from sso2.oauth.grants.openid_hybrid import MyOpenIDHybridGrant
+from sso2.oauth.grants.openid_implicit import MyOpenIDImplicitGrant
+from sso2.oauth.grants.openidcode import MyOpenIDCode
+from sso2.oauth.grants.password import MyPasswordGrant
+from sso2.oauth.grants.refresh_token import MyRefreshTokenGrant
+from sso2.oauth.models.oauth2_client_model import OAuth2Client
+from sso2.oauth.models.oauth2_token_model import OAuth2Token
 
 
 class MyAuthorizationServer(AuthorizationServer):  # type: ignore[misc]

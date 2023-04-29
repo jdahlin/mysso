@@ -35,6 +35,8 @@ DEBUG = True
 
 INSTALLED_APPS = [
     "sso2.core.apps.CoreConfig",
+    "sso2.oauth.apps.OauthConfig",
+    "sso2.portal.apps.PortalConfig",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -66,7 +68,10 @@ ROOT_URLCONF = "sso2.django_project.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [BASE_DIR / "core" / "templates"],
+        "DIRS": [
+            BASE_DIR / "core" / "templates",
+            BASE_DIR / "portal" / "templates",
+        ],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
