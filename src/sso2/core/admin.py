@@ -9,7 +9,6 @@ from django.utils.safestring import SafeString, mark_safe
 
 from sso2.core.models import Tenant
 from sso2.core.models.user_model import User
-from sso2.oauth.models.oauth2_client_model import OAuth2Client
 
 FORM_FIELD_OVERRIDES: Mapping[type[Field[Any, Any]], Mapping[str, Any]] = {
     TextField: {"widget": TextInput(attrs={"size": 100})},
@@ -20,10 +19,10 @@ class MyUserAdmin(UserAdmin):
     UserAdmin.list_display += ("tenant_link",)  # type: ignore[operator]
 
     @admin.display(description="Tenant")
-    def tenant_link(self, client: OAuth2Client) -> SafeString:
+    def tenant_link(self, user: User) -> SafeString:
         return mark_safe(
-            f'<a href="/admin/core/tenant/{client.tenant_id}/change/">'
-            f"{client.tenant.name}"
+            f'<a href="/admin/core/tenant/{user.tenant_id}/change/">'
+            f"{user.tenant.name}"
             f"</a>",
         )
 
