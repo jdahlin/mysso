@@ -9,7 +9,7 @@ from sso2.core.types import HttpRequestWithUser
 
 @login_required
 @require_http_methods(["GET"])
-def home(request: HttpRequestWithUser, tenant_id: str) -> HttpResponse:
+def security(request: HttpRequestWithUser, tenant_id: str) -> HttpResponse:
     tenant = Tenant.get_or_404(tenant_id=tenant_id)
-    context = {"user": request.user, "tenant": tenant}
+    context = {"tenant": tenant, "user": request.user}
     return render(request, "security.html", context)

@@ -1,8 +1,7 @@
-{% load i18n %}
-{% url 'logout' tenant_id=tenant.id as logout_url %}
-{% url 'home' tenant_id=tenant.id as home_url %}
-{% url 'personal-information' tenant_id=tenant.id as personal_information_url %}
-{% url 'security' tenant_id=tenant.id as security_url %}
+{% set logout_url = url('logout', kwargs={'tenant_id': tenant.id}) %}
+{% set home_url = url('home', kwargs={'tenant_id': tenant.id}) %}
+{% set personal_information_url = url('personal-information', kwargs={'tenant_id': tenant.id}) %}
+{% set security_url = url('security', kwargs={'tenant_id': tenant.id}) %}
 <!DOCTYPE html>
 <html {% if LANGUAGE_BIDI %}dir="rtl"{% endif %}>
 <head>
@@ -25,14 +24,15 @@
                     <img class="hidden h-8 w-8 lg:block"
                          src="https://tailwindui.com/img/logos/mark.svg?color=indigo&shade=500" alt="Your Company">
                 </div>
-                {% if user.is_authenticated %}
+                {% if request.user.is_authenticated %}
                 <div class="hidden sm:ml-6 sm:block">
                     <div class="flex space-x-4">
-                        {% with current="bg-gray-900 text-white" default="text-gray-300 hover:bg-gray-700 hover:text-white" common="rounded-md px-3 py-2 text-sm font-medium" %}
+                        {% set current="bg-gray-900 text-white" %}
+                        {% set default="text-gray-300 hover:bg-gray-700 hover:text-white" %}
+                        {% set common="rounded-md px-3 py-2 text-sm font-medium" %}
                         <a href="{{ home_url }}"                 class="{{ common }} {% if request.path == home_url %}{{ current }} {% else %}{{ default }}{% endif %}">Your Account</a>
                         <a href="{{ personal_information_url }}" class="{{ common }} {% if request.path == personal_information_url %}{{ current }} {% else %}{{ default }}{% endif %}">Personal Information</a>
                         <a href="{{ security_url }}"             class="{{ common }} {% if request.path == security_url %}{{ current }} {% else %}{{ default }}{% endif %}">Security</a>
-                        {% endwith %}
                     </div>
                 </div>
                 {% endif %}
@@ -58,7 +58,7 @@
                 {#                {% endif %}#}
 
                 <!-- Profile dropdown -->
-                {% if user.is_authenticated %}
+                {% if request.user.is_authenticated %}
                 <div class="relative ml-3" id="profile-menu-button">
                     <div>
                         <button type="button"
@@ -76,9 +76,9 @@
                         <a href="#" class="block px-4 py-2 text-sm text-gray-700" role="menuitem" tabindex="-1"
                            id="user-menu-item-0">Change Picture</a>
                         <form action="{{ logout_url }}?next=login" method="post">
-                            {% csrf_token %}
+                            {{ csrf_input }}
                             <button class="block px-4 py-2 text-sm text-gray-700" role="menuitem" tabindex="-1"
-                                    id="user-menu-item-2">{% trans "Logout" %}</button>
+                                    id="user-menu-item-2">{{ gettext("Logout") }}</button>
                         </form>
                     </div>
                 </div>

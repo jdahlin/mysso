@@ -1,9 +1,11 @@
 {% extends "_base.html" %}
-{% load i18n %}
 
-{% block title %}{% trans "Personal Information" %}{% endblock %}
+{% block title %}{{ gettext("Personal Information") }}{% endblock %}
 {% block nav_home %}active{% endblock %}
 
 {% block content %}
-
+  <ol>
+    <li><b>FIXME</b>: Manage two-factor authentication</li>
+    <li><b>FIXME</b>: Change Password</li>
+  </ol>
 {% endblock %}

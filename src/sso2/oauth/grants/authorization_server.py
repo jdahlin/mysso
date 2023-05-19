@@ -64,7 +64,7 @@ class MyAuthorizationServer(AuthorizationServer):  # type: ignore[misc]
         user: User | None = None,
         scope: str | None = None,
     ) -> str:
-        raise NotImplementedError
+        return "FIXME"
 
     def create_bearer_token_generator(self) -> BearerTokenGenerator:
         """Default method to create BearerToken generator."""

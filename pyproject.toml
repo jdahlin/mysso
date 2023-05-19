@@ -106,7 +106,7 @@ ignore = [
 "src/sso2/cli/main.py" = ["E402"]
 "src/sso2/django_project/settings/*.py" = ["F403"]
 "src/sso2/django_project/settings/local.py" = ["S105"]
-"*/test_*.py" = ["S101", "FBT003"]
+"*/test_*.py" = ["S101", "FBT003", "PLR0913"]
 
 [tool.mypy]
 mypy_path = "./src"
@@ -129,6 +129,7 @@ module = [
   "django_otp.*",
   "formtools.*",
   "requests_auth",
+  "phonenumber_field.*",
   "two_factor.*"
 ]
 ignore_missing_imports = true

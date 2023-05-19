@@ -3,6 +3,7 @@ from typing import TYPE_CHECKING
 
 from django.contrib.auth.models import AbstractUser, UserManager
 from django.db.models import CASCADE, BooleanField, DateTimeField, ForeignKey
+from phonenumber_field.modelfields import PhoneNumberField
 
 if TYPE_CHECKING:
     from sso2.core.models import Tenant
@@ -29,6 +30,8 @@ class User(AbstractUser):
     tenant = ForeignKey("core.Tenant", on_delete=CASCADE, null=True)
 
     email_verified = BooleanField(default=False)
+
+    phone_number = PhoneNumberField(blank=True)
 
     # OpenID
 

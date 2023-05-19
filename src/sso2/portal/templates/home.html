@@ -1,16 +1,16 @@
 {% extends "_base.html" %}
-{% load i18n %}
 
-{% block title %}{% trans "User Portal" %}{% endblock %}
+{% block title %}{{ gettext("User Portal") }}{% endblock %}
 {% block nav_home %}active{% endblock %}
 
 {% block content %}
-  {% url 'mfa-setup' tenant_id=tenant.id as setup_url %}
-  {% url 'secret' as secret_url %}
-  <ol>
-    <li>{% blocktrans trimmed %}<a href="{{ setup_url }}" class="underline"><b>Enable</b></a> two-factor
-      authentication.{% endblocktrans %}</li>
-    <li>{% blocktrans trimmed %}At last, you've gained access to the
-      <a href="{{ secret_url }}">secret page</a>! :-){% endblocktrans %}</li>
-  </ol>
+    <h1 class="text-4xl">Welcome to the User portal</h1>
+    <br>
+    <p class="text-2xl">Here's a list of things you can do:</p>
+    <br>
+    <ul class="list-disc">
+        <li>Change your personal information (name, phone number, gender etc)</li>
+        <li>Change your security settings (password, security questions etc)</li>
+    </ul>
+
 {% endblock %}

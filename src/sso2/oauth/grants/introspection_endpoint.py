@@ -1,4 +1,4 @@
-from typing import TypedDict, cast
+from typing import NotRequired, TypedDict, cast
 
 from authlib.oauth2 import OAuth2Request
 from authlib.oauth2.rfc7662 import IntrospectionEndpoint
@@ -12,6 +12,7 @@ class IntrospectedToken(TypedDict):
     client_id: str
     token_type: str
     username: str | None
+    email: NotRequired[str | None]
     scope: str
     sub: int | None
     aud: str
@@ -36,14 +37,17 @@ class MyIntrospectionEndpoint(IntrospectionEndpoint):  # type: ignore[misc]
     def introspect_token(self, token: OAuth2Token) -> IntrospectedToken:
         sub = None
         username = None
+        email = None
         if token.user:
             sub = token.user.id
             username = token.user.username
+            email = token.user.email
         return {
             "active": True,
             "client_id": token.client_id,
             "token_type": token.token_type,
             "username": username,
+            "email": email,
             "scope": token.get_scope(),
             "sub": sub,
             "aud": token.client_id,

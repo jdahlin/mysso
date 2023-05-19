@@ -64,10 +64,16 @@ ROOT_URLCONF = "sso2.django_project.urls"
 
 TEMPLATES = [
     {
+        "BACKEND": "django.template.backends.jinja2.Jinja2",
+        "DIRS": [
+            BASE_DIR / "portal" / "templates",
+        ],
+        "OPTIONS": {"environment": "sso2.core.jinja_env.environment"},
+    },
+    {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
         "DIRS": [
             BASE_DIR / "core" / "templates",
-            BASE_DIR / "portal" / "templates",
         ],
         "APP_DIRS": True,
         "OPTIONS": {
@@ -142,7 +148,7 @@ STATICFILES_DIRS = [
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # Our own settings
-APP_HOST = "http://sso.lvh.me:5000/"
+APP_HOST = "https://sso.mac.nilhad.com/"
 
 LOGIN_URL = "two_factor:login"
 LOGIN_REDIRECT_URL = "home"
@@ -155,7 +161,8 @@ TESTING = False
 
 # FIXME: Move out of settings
 app_host_url = urllib.parse.urlparse(APP_HOST)
-ALLOWED_HOSTS: list[str] = [app_host_url.netloc, "localhost"]
+
+ALLOWED_HOSTS: list[str] = [app_host_url.netloc.split(":", 1)[0], "localhost"]
 CSRF_TRUSTED_ORIGINS = [
     f"{app_host_url.scheme}://{app_host_url.netloc}",
 ]

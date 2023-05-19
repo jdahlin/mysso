@@ -148,3 +148,5 @@ sql_app.db
 src/application-client/.credentials.json
 /sql_app_test.db
 /src/sso2/django_project/settings/local.py
+
+.import_linter_cache

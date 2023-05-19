@@ -11,8 +11,10 @@ from django.db.models import (
 )
 from django.utils.safestring import mark_safe
 
+from sso2.oauth.models.authorized_app_model import OAuth2AuthorizedApp
+
 if TYPE_CHECKING:
-    from sso2.core.models import Tenant
+    from sso2.core.models import Tenant, User
 
 
 class OAuth2Client(Model, ClientMixin):  # type: ignore[misc]
@@ -149,6 +151,24 @@ See <a href="https://tools.ietf.org/html/rfc7636">RFC 7636</a> for more informat
     def check_grant_type(self, grant_type: str) -> bool:
         allowed = self.grant_type.split()
         return grant_type in allowed
+
+    def is_authorized_for(self, user: "User") -> bool:
+        return (
+            OAuth2AuthorizedApp.objects.filter(
+                user=user,
+                client=self,
+                tenant=self.tenant,
+            ).count()
+            > 0
+        )
+
+    def authorize(self, *, scope: str, user: "User") -> None:
+        OAuth2AuthorizedApp.objects.create(
+            user=user,
+            client=self,
+            tenant=self.tenant,
+            scope=scope,
+        )
 
     @classmethod
     def create_example(

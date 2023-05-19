@@ -9,7 +9,7 @@ from formtools.wizard.views import WizardView
 from two_factor.utils import get_otpauth_url, totp_digits
 from two_factor.views import SetupView
 
-from sso2.core.models import Tenant
+from sso2.core.models.tenant_model import Tenant
 
 
 class MFASetupView(SetupView):  # type: ignore[misc]

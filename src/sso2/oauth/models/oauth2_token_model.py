@@ -40,3 +40,9 @@ class OAuth2Token(Model, TokenMixin):  # type: ignore[misc]
 
     def get_expires_at(self) -> int:
         return self.issued_at + self.expires_in
+
+    def is_expired(self) -> bool:
+        return self.revoked or self.get_expires_at() < now_timestamp()
+
+    def is_revoked(self) -> bool:
+        return self.revoked
