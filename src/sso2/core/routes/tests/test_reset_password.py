@@ -105,6 +105,6 @@ def test_reset_password(
         if form:
             assert form.errors == form_errors
     else:
-        assert response.headers["Location"] == "/tenant/1/login"
+        assert response.headers["Location"] == f"/tenant/{tenant.id}/login"
         user.refresh_from_db()
         assert user.password == data["password"]

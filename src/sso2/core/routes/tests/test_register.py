@@ -163,7 +163,7 @@ def test_register(
         assert response.context["form"].errors == form_errors
         assert len(mail.outbox) == 0
     else:
-        assert response.headers["Location"] == "/tenant/1/login"
+        assert response.headers["Location"] == f"/tenant/{tenant.id}/login"
 
         user = User.objects.get(email="bob.smith@example.com")
         assert user.tenant

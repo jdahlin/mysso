@@ -1,8 +1,9 @@
 import urllib.parse
+import uuid
 
 from authlib.jose import RSAKey
 from django.conf import settings
-from django.db.models import Model, TextField
+from django.db.models import Model, TextField, UUIDField
 from django.http import Http404
 
 from sso2.core.keyutils import (
@@ -14,6 +15,13 @@ from sso2.core.keyutils import (
 
 
 class Tenant(Model):
+    id = UUIDField(
+        auto_created=True,
+        primary_key=True,
+        editable=False,
+        default=uuid.uuid4,
+        verbose_name="ID",
+    )
     name = TextField(unique=True)
     public_key_path = TextField()
     private_key_path = TextField()
@@ -37,7 +45,7 @@ class Tenant(Model):
     @classmethod
     def get_or_404(cls, *, tenant_id: str) -> "Tenant":
         try:
-            return cls.objects.get(pk=int(tenant_id))
+            return cls.objects.get(pk=tenant_id)
         except (Tenant.DoesNotExist, ValueError):
             try:
                 return cls.objects.get(name=tenant_id)

@@ -8,17 +8,17 @@ from sso2.core.routes.twofactor_setup import MFASetupView
 from sso2.core.routes.verify_email import verify_email
 
 urlpatterns = [
-    path("tenant/<str:tenant_id>/login", NewLoginView.as_view(), name="login"),
-    path("tenant/<str:tenant_id>/logout", LogoutView.as_view(), name="logout"),
-    path("tenant/<str:tenant_id>/register", register, name="register"),
-    path("tenant/<str:tenant_id>/mfa-setup", MFASetupView.as_view(), name="mfa-setup"),
+    path("tenant/<uuid:tenant_id>/login", NewLoginView.as_view(), name="login"),
+    path("tenant/<uuid:tenant_id>/logout", LogoutView.as_view(), name="logout"),
+    path("tenant/<uuid:tenant_id>/register", register, name="register"),
+    path("tenant/<uuid:tenant_id>/mfa-setup", MFASetupView.as_view(), name="mfa-setup"),
     path(
-        "tenant/<str:tenant_id>/verify-email/<str:token>",
+        "tenant/<uuid:tenant_id>/verify-email/<str:token>",
         verify_email,
         name="verify_email",
     ),
     path(
-        "tenant/<str:tenant_id>/reset-password/<str:token>",
+        "tenant/<uuid:tenant_id>/reset-password/<str:token>",
         reset_password,
         name="reset_password",
     ),

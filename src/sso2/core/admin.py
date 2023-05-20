@@ -32,7 +32,7 @@ admin.site.register(User, MyUserAdmin)
 class TenantCodeAdmin(admin.ModelAdmin[Tenant]):
     formfield_overrides = FORM_FIELD_OVERRIDES
     list_display = [
-        "id",
+        "pk",
         "name",
         "algorithm",
     ]

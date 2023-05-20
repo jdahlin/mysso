@@ -3,9 +3,6 @@ import uuid
 from typing import Any, cast
 
 from authlib.integrations.django_oauth2 import AuthorizationServer, RevocationEndpoint
-from authlib.integrations.django_oauth2.authorization_server import (
-    create_token_expires_in_generator,
-)
 from authlib.jose import jwt
 from authlib.oauth2 import OAuth2Request
 from authlib.oauth2.rfc6749 import ClientCredentialsGrant, ImplicitGrant
@@ -25,56 +22,51 @@ from sso2.oauth.models.oauth2_client_model import OAuth2Client
 from sso2.oauth.models.oauth2_token_model import OAuth2Token
 
 
+# This implements most of: https://www.rfc-editor.org/rfc/rfc9068.html
+def access_token_generator(
+    client: OAuth2Client,
+    grant_type: str,
+    user: User | None = None,
+    scope: str | None = None,
+) -> str:
+    tenant = client.tenant
+    private_key = tenant.get_private_key()
+    now = int(time.time())
+    sub: int | str | None
+    if grant_type == "client_credentials":
+        sub = client.client_id
+    elif user and scope and "openid" in scope:
+        sub = user.pk
+    else:
+        sub = None
+
+    header = {
+        "typ": "at+JWT",
+        "alg": tenant.algorithm,
+        "kid": private_key.thumbprint(),
+    }
+    payload = {
+        # FIXME: reasonable default (issuer) and fetch from 'resource' parameter
+        #  to authorize endpoint
+        "aud": [client.client_id],
+        "auth_time": now,
+        "client_id": client.client_id,
+        "exp": now + 3600,
+        "jti": uuid.uuid4().hex,
+        "iat": now,
+        "iss": tenant.get_issuer(),
+        "sub": sub,
+    }
+
+    return str(jwt.encode(header, payload, private_key).decode())
+
+
 class MyAuthorizationServer(AuthorizationServer):  # type: ignore[misc]
-    # This implements most of: https://www.rfc-editor.org/rfc/rfc9068.html
-    def access_token_generator(
-        self,
-        client: OAuth2Client,
-        grant_type: str,
-        user: User | None = None,
-        scope: str | None = None,
-    ) -> str:
-        tenant = client.tenant
-        private_key = tenant.get_private_key()
-        now = int(time.time())
-        header = {
-            "typ": "at+JWT",
-            "alg": tenant.algorithm,
-            "kid": private_key.thumbprint(),
-        }
-        payload = {
-            # FIXME: reasonable default (issuer) and fetch from 'resource' parameter
-            #  to authorize endpoint
-            "aud": [client.client_id],
-            "auth_time": now,
-            "client_id": client.client_id,
-            "exp": now + 3600,
-            "jti": uuid.uuid4().hex,
-            "iat": now,
-            "iss": tenant.get_issuer(),
-        }
-        if user and scope and "openid" in scope:
-            payload["sub"] = user.pk
-        return str(jwt.encode(header, payload, private_key).decode())
-
-    def refresh_token_generator(
-        self,
-        client: OAuth2Client,
-        grant_type: str,
-        user: User | None = None,
-        scope: str | None = None,
-    ) -> str:
-        return "FIXME"
-
     def create_bearer_token_generator(self) -> BearerTokenGenerator:
         """Default method to create BearerToken generator."""
-        conf = self.config.get("token_expires_in")
-        expires_generator = create_token_expires_in_generator(conf)
-        return BearerTokenGenerator(
-            access_token_generator=self.access_token_generator,
-            refresh_token_generator=self.refresh_token_generator,
-            expires_generator=expires_generator,
-        )
+        generator = super().create_bearer_token_generator()
+        generator.access_token_generator = access_token_generator
+        return generator
 
     def save_token(self, token: dict[str, Any], request: OAuth2Request) -> OAuth2Token:
         """Default method for ``AuthorizationServer.save_token``. Developers MAY

@@ -9,32 +9,32 @@ from sso2.oauth.routes.openid_jwks import openid_well_known_jwks
 
 urlpatterns = [
     path(
-        "tenant/<str:tenant_id>/protocol/oauth2/authorize",
+        "tenant/<uuid:tenant_id>/protocol/oauth2/authorize",
         oauth2_authorize,
         name="oauth2-authorize",
     ),
     path(
-        "tenant/<str:tenant_id>/protocol/oauth2/introspect",
+        "tenant/<uuid:tenant_id>/protocol/oauth2/introspect",
         oauth2_introspect,
         name="oauth2-introspect",
     ),
     path(
-        "tenant/<str:tenant_id>/protocol/oauth2/revoke",
+        "tenant/<uuid:tenant_id>/protocol/oauth2/revoke",
         oauth2_revoke,
         name="oauth2-revoke",
     ),
     path(
-        "tenant/<str:tenant_id>/protocol/oauth2/token",
+        "tenant/<uuid:tenant_id>/protocol/oauth2/token",
         oauth2_token,
         name="oauth2-token",
     ),
     path(
-        "tenant/<str:tenant_id>/.well-known/jwks.json",
+        "tenant/<uuid:tenant_id>/.well-known/jwks.json",
         openid_well_known_jwks,
         name="jwks",
     ),
     path(
-        "tenant/<str:tenant_id>/.well-known/openid-configuration",
+        "tenant/<uuid:tenant_id>/.well-known/openid-configuration",
         openid_well_known_configuration,
         name="openid-configuration",
     ),

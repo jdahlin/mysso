@@ -7,7 +7,7 @@ from jinja2 import Environment, select_autoescape
 
 
 def environment(**options: Any) -> Environment:
-    options["autoescape"] = select_autoescape(  # type: ignore[attr-defined]
+    options["autoescape"] = select_autoescape(
         default_for_string=True,
         default=True,
     )
