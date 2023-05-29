@@ -5,6 +5,7 @@ from django.db.models import (
     CASCADE,
     BooleanField,
     CharField,
+    DateTimeField,
     ForeignKey,
     Model,
     TextField,
@@ -24,45 +25,35 @@ class OAuth2Client(Model, ClientMixin):  # type: ignore[misc]
 
     tenant = ForeignKey("core.Tenant", on_delete=CASCADE)
     client_name = TextField()
-    grant_type = TextField(
-        default="",
-        choices=[
-            ("authorization_code", "Authorization Code"),
-            ("client_credentials", "Client Credentials (server to server)"),
-            ("urn:ietf:params:oauth:grant-type:device_code", "Device code"),
-            ("implicit", "Implicit (legacy)"),
-            ("password", "Password (legacy)"),
-            ("refresh_token", "Refresh Token"),
-        ],
-        help_text=mark_safe(
-            """
-    OAuth2/OpenID Connect grant types. Recommended grant types are:<br>
-    <ul>
-    <li><a href="https://oauth.net/2/grant-types/authorization-code/">
-    authorization_code</a> (optionally with
-    <a href="https://oauth.net/2/pkce/">PKCE</a>)</li>
-    <li><a href="https://oauth.net/2/grant-types/refresh-token/">
-    refresh_token</a></li>
-    <li><a href="https://oauth.net/2/grant-types/device-code/">
-    device code</a></li>
-    <li><a href="https://oauth.net/2/grant-types/client-credentials/">
-    client_credentials</a> (for server-to-server communication)</li>
-    </ul>
 
-    Legacy, not recommended
-    <ul>
-    <li><a href="https://oauth.net/2/grant-types/implicit/">implicit</a>
-    (not recommended, using access_token in URL)</li>
-    <li>password (not recommended, using username and password)</li>
-    </ul>
+    # OAuth 2.0 Authorization Code Grant
+    # https://oauth.net/2/grant-types/authorization-code/
+    authorization_code_grant = BooleanField(default=True)
 
-    """,
-        ),
-    )
+    # OAuth 2.0 Client Credentials Grant
+    # https://oauth.net/2/grant-types/client-credentials
+    client_credentials_grant = BooleanField(default=False)
+
+    # OAuth 2.0 Refresh Token Grant
+    # https://oauth.net/2/grant-types/refresh-token/
+    refresh_token_grant = BooleanField(default=True)
+
+    # OAuth 2.0 Device Code Grant
+    # https://oauth.net/2/grant-types/device-code/
+    device_code_grant = BooleanField(default=True)
+
+    # OAuth 2.0 Implicit Grant (legacy)
+    # https://oauth.net/2/grant-types/implicit
+    implicit_grant = BooleanField(default=False)
+
+    # OAuth 2.0 Password Grant (legacy)
+    # https://oauth.net/2/grant-types/password/
+    password_grant = BooleanField(default=False)
+
     client_id = CharField(max_length=48, unique=True, db_index=True)
     client_secret = CharField(max_length=48, blank=True)
-    redirect_uris = TextField(default="", blank=True)
-    default_redirect_uri = TextField(blank=True, default="")
+
+    allowed_callback_uris = TextField(default="", blank=True)
     scope = TextField(default="")
     token_endpoint_auth_method = CharField(
         max_length=120,
@@ -72,6 +63,7 @@ class OAuth2Client(Model, ClientMixin):  # type: ignore[misc]
             ("client_secret_post", "client_secret_post"),
             ("client_secret_jwt", "client_secret_jwt"),
             ("private_key_jwt", "private_key_jwt"),
+            ("none", "none"),
             # FIXME: authlib doesn't support this yet
         ],
         help_text="""
@@ -100,6 +92,8 @@ Valid options, array of space terminated:<br>
 """,
     )
     require_nonce = BooleanField(default=False)
+
+    # https://oauth.net/2/pkce/
     require_code_challenge = BooleanField(
         default=False,
         verbose_name="Require PKCE",
@@ -112,8 +106,13 @@ See <a href="https://tools.ietf.org/html/rfc7636">RFC 7636</a> for more informat
         ),
     )
 
+    description = TextField(default="", blank=True)
+
     # you can add more fields according to your own need
     # check https://tools.ietf.org/html/rfc7591#section-2
+
+    created_at = DateTimeField(auto_now_add=True)
+    updated_at = DateTimeField(auto_now=True)
 
     def __str__(self) -> str:
         return self.client_name
@@ -121,8 +120,10 @@ See <a href="https://tools.ietf.org/html/rfc7636">RFC 7636</a> for more informat
     def get_client_id(self) -> str:
         return self.client_id
 
-    def get_default_redirect_uri(self) -> str:
-        return self.default_redirect_uri
+    def get_default_redirect_uri(self) -> str | None:
+        if self.allowed_callback_uris:
+            return self.allowed_callback_uris.split()[0]
+        return None
 
     def get_allowed_scope(self, scope: str) -> str:
         if not scope:
@@ -131,9 +132,7 @@ See <a href="https://tools.ietf.org/html/rfc7636">RFC 7636</a> for more informat
         return str(list_to_scope([s for s in scope.split() if s in allowed]))
 
     def check_redirect_uri(self, redirect_uri: str) -> bool:
-        if redirect_uri == self.default_redirect_uri:
-            return True
-        return redirect_uri in self.redirect_uris
+        return redirect_uri in self.allowed_callback_uris.split()
 
     def check_client_secret(self, client_secret: str) -> bool:
         return self.client_secret == client_secret
@@ -149,8 +148,21 @@ See <a href="https://tools.ietf.org/html/rfc7636">RFC 7636</a> for more informat
         return response_type in allowed
 
     def check_grant_type(self, grant_type: str) -> bool:
-        allowed = self.grant_type.split()
-        return grant_type in allowed
+        match grant_type:
+            case "authorization_code":
+                return self.authorization_code_grant
+            case "client_credentials":
+                return self.client_credentials_grant
+            case "refresh_token":
+                return self.refresh_token_grant
+            case "device_code":
+                return self.device_code_grant
+            case "implicit":
+                return self.implicit_grant
+            case "password":
+                return self.password_grant
+            case _:
+                raise ValueError(f"Unknown grant type: {grant_type}")
 
     def is_authorized_for(self, user: "User") -> bool:
         return (
@@ -176,17 +188,51 @@ See <a href="https://tools.ietf.org/html/rfc7636">RFC 7636</a> for more informat
         tenant: "Tenant",
         grant_type: str = "authorization_code",
         response_type: str = "code",
-        token_endpoint_auth_method: str = "client_sec" + "ret_basic",
+        token_endpoint_auth_method: str = "client_secret_basic",  # noqa: S107
     ) -> Self:
+        kwargs: dict[str, bool] = {}
+        if grant_type == "client_credentials":
+            kwargs["client_credentials_grant"] = True
+        elif grant_type == "authorization_code":
+            kwargs["authorization_code_grant"] = True
+        elif grant_type == "password":
+            kwargs["password_grant"] = True
+        elif grant_type == "device_code":
+            kwargs["device_code_grant"] = True
+        elif grant_type == "refresh_token":
+            kwargs["refresh_token_grant"] = True
+        elif grant_type == "implicit":
+            kwargs["implicit_grant"] = True
+
         return cls(
             client_name="test-client",
             client_id="TESTCLIENT",
             client_secret="s3c" + "r3t!",
-            redirect_uris="https://example.com/callback",
+            allowed_callback_uris="https://example.com/callback",
             response_type=response_type,
-            grant_type=grant_type,
             scope="openid email profile",
             tenant=tenant,
             token_endpoint_auth_method=token_endpoint_auth_method,
             require_nonce=False,
+            **kwargs,
         )
+
+
+class OAuth2ClientCredential(Model):
+    tenant = ForeignKey(
+        "core.Tenant",
+        on_delete=CASCADE,
+    )
+    client = ForeignKey(
+        OAuth2Client,
+        on_delete=CASCADE,
+        related_name="public_keys",
+    )
+    name = TextField()
+    pem_data = TextField()
+    thumbprint = TextField(default="")
+    algorithm = TextField(
+        default="RS256",
+        choices=[("RS256", "RS256"), ("RS384", "RS384"), ("PS256", "PS256")],
+    )
+    expires_at = DateTimeField(null=True, blank=True)

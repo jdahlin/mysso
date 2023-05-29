@@ -5,7 +5,7 @@ from sso2.portal.routes.personal_information import personal_information
 from sso2.portal.routes.security import security
 
 urlpatterns = [
-    path("tenant/<uuid:tenant_id>/portal", home, name="home"),
+    path("portal", home, name="home"),
     path(
         "tenant/<uuid:tenant_id>/portal/info",
         personal_information,

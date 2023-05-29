@@ -7,6 +7,16 @@ from sso2.oauth.models.authorization_code_model import AuthorizationCode
 
 
 class MyOpenIDImplicitGrant(OpenIDImplicitGrant):  # type: ignore[misc]
+    TOKEN_ENDPOINT_AUTH_METHODS = [
+        "client_secret_basic",
+        "client_secret_jwt",
+        "client_secret_post",
+        "none",
+        "private_key_jwt",
+        # "self_signed_tls_client_auth",
+        # "tls_client_auth",
+    ]
+
     def exists_nonce(self, nonce: str, request: OAuth2Request) -> bool:
         try:
             AuthorizationCode.objects.get(client_id=request.client_id, nonce=nonce)

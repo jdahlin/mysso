@@ -1,3 +1,5 @@
+from typing import TYPE_CHECKING
+
 from django.contrib.auth import authenticate
 from django.contrib.auth.forms import AuthenticationForm
 from django.core.exceptions import ValidationError
@@ -7,10 +9,13 @@ from django.urls import reverse
 from two_factor.forms import AuthenticationTokenForm, BackupTokenForm
 from two_factor.views.core import LoginView
 
-from sso2.core.models.tenant_model import Tenant
+if TYPE_CHECKING:
+    from sso2.core.types import HttpRequestWithUser
 
 
 class NewAuthenticationForm(AuthenticationForm):
+    request: "HttpRequestWithUser"
+
     username = CharField(
         widget=TextInput(
             attrs={
@@ -35,14 +40,12 @@ class NewAuthenticationForm(AuthenticationForm):
         username = self.cleaned_data.get("username")
         password = self.cleaned_data.get("password")
         assert self.request is not None
-        tenant_id = self.request.path.split("/")[2]
-        tenant = Tenant.get_or_404(tenant_id=tenant_id)
         if username is not None and password:
             self.user_cache = authenticate(
                 request=self.request,
                 username=username,
                 password=password,
-                tenant=tenant,
+                tenant=self.request.tenant,
             )
             if self.user_cache is None:
                 raise ValidationError(
@@ -65,7 +68,7 @@ class NewLoginView(LoginView):  # type: ignore[misc]
     )
 
     def get_success_url(self) -> str:
-        url = self.get_redirect_url()
-        tenant_id = self.request.path.split("/")[2]
-        tenant = Tenant.get_or_404(tenant_id=tenant_id)
-        return url or resolve_url(reverse("home", kwargs={"tenant_id": tenant.id}))
+        redirect_to = self.request.GET.get("next", "")
+        if not redirect_to:
+            return resolve_url(reverse("home"))
+        return redirect_to

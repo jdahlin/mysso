@@ -14,7 +14,15 @@ def exists_nonce(nonce: str, request: OAuth2Request) -> bool:
 
 
 class MyAuthorizationCodeGrant(AuthorizationCodeGrant):  # type: ignore[misc]
-    TOKEN_ENDPOINT_AUTH_METHODS = ["client_secret_basic", "client_secret_post", "none"]
+    TOKEN_ENDPOINT_AUTH_METHODS = [
+        "client_secret_basic",
+        "client_secret_jwt",
+        "client_secret_post",
+        "none",
+        "private_key_jwt",
+        # "self_signed_tls_client_auth",
+        # "tls_client_auth",
+    ]
 
     def validate_authorization_redirect_uri(
         self,

@@ -98,6 +98,7 @@ def test_reset_password(
     response = client.post(
         reverse("reset_password", kwargs={"tenant_id": tenant.id, "token": token}),
         data=data,
+        HTTP_HOST="test.i-1.app",
     )
     assert response.status_code == status_code
     if status_code == http.HTTPStatus.OK:
@@ -105,6 +106,6 @@ def test_reset_password(
         if form:
             assert form.errors == form_errors
     else:
-        assert response.headers["Location"] == f"/tenant/{tenant.id}/login"
+        assert response.headers["Location"] == "/login"
         user.refresh_from_db()
         assert user.password == data["password"]

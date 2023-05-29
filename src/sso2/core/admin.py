@@ -34,6 +34,7 @@ class TenantCodeAdmin(admin.ModelAdmin[Tenant]):
     list_display = [
         "pk",
         "name",
+        "display_name",
         "algorithm",
     ]
 

@@ -7,7 +7,6 @@ from django.views.decorators.http import require_http_methods
 
 from sso2.core.formfields import PasswordField
 from sso2.core.models import User
-from sso2.core.models.tenant_model import Tenant
 from sso2.core.types import HttpRequestWithUser
 
 
@@ -65,9 +64,7 @@ class SignupForm(Form):
 @require_http_methods(["GET", "POST"])
 def register(
     request: HttpRequestWithUser,
-    tenant_id: str,
 ) -> HttpResponse:
-    tenant = Tenant.get_or_404(tenant_id=tenant_id)
     if request.method == "POST":
         form = SignupForm(request.POST)
         if form.is_valid():
@@ -77,14 +74,14 @@ def register(
                 first_name=form.cleaned_data["first_name"],
                 last_name=form.cleaned_data["last_name"],
                 password=form.cleaned_data["password"],
-                tenant=tenant,
+                tenant=request.tenant,
             )
-            return redirect(reverse("login", kwargs={"tenant_id": tenant_id}))
+            return redirect(reverse("login"))
     else:
         form = SignupForm()
 
     context = {
-        "action": reverse("register", kwargs={"tenant_id": tenant_id}),
+        "action": reverse("register"),
         "form": form,
     }
     return render(request, "register.html", context)

@@ -24,7 +24,8 @@
                         class="text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700 py-2 w-full">
 
                 <input type="hidden" name="client_id" value="{{ client.client_id }}">
-                <input type="hidden" name="scopes" value="{{ scopes }}">
+{#                <input type="hidden" name="redirect_uri" value="{{ redirect_uri }}">#}
+                <input type="hidden" name="scope" value="{{ scope }}">
                 <input
                         name="confirm"
                         value="Allow"

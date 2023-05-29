@@ -22,4 +22,4 @@ def verify_email(request: HttpRequest, tenant_id: str, token: str) -> HttpRespon
         user.email_verified = True
         user.save()
     messages.info(request, "Email verified, you can now login!")
-    return redirect(reverse("login", kwargs={"tenant_id": tenant.id}))
+    return redirect(reverse("login"))

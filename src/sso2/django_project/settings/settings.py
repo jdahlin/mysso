@@ -40,6 +40,8 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "corsheaders",
+    "rest_framework",
     "django_otp",
     "django_otp.plugins.otp_static",
     "django_otp.plugins.otp_totp",
@@ -52,6 +54,8 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "sso2.core.middleware.tenant_middleware.TenantMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -148,7 +152,7 @@ STATICFILES_DIRS = [
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # Our own settings
-APP_HOST = "https://sso.mac.nilhad.com/"
+APP_HOST = "https://i-1.app/"
 
 LOGIN_URL = "two_factor:login"
 LOGIN_REDIRECT_URL = "home"
@@ -161,9 +165,47 @@ TESTING = False
 
 # FIXME: Move out of settings
 app_host_url = urllib.parse.urlparse(APP_HOST)
+APP_DOMAIN_NAME = app_host_url.hostname
 
-ALLOWED_HOSTS: list[str] = [app_host_url.netloc.split(":", 1)[0], "localhost"]
+ALLOWED_HOSTS: list[str] = [
+    "." + app_host_url.netloc.split(":", 1)[0],
+    "127.0.0.1",
+    "localhost",
+]
 CSRF_TRUSTED_ORIGINS = [
     f"{app_host_url.scheme}://{app_host_url.netloc}",
+    "https://*.i-1.app",
 ]
 TWO_FACTOR_WEBAUTHN_RP_NAME = "MySSO"
+
+# CORS
+CORS_ALLOWED_ORIGINS = [
+    "https://admin.i-1.app",
+    "http://localhost:3000",
+]
+
+CORS_ALLOW_HEADERS = (
+    "accept",
+    "authorization",
+    "content-type",
+    "user-agent",
+    "x-csrftoken",
+    "x-requested-with",
+    "auth0-client",
+)
+
+
+#     # ...
+#         # ...
+#         },
+#     },
+#         # ...
+#         "django.security.DisallowedHost": {
+#         },
+#     },
+
+REST_FRAMEWORK = {
+    "DEFAULT_RENDERER_CLASSES": [
+        "rest_framework.renderers.JSONRenderer",
+    ],
+}

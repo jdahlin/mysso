@@ -10,6 +10,7 @@ from authlib.oauth2.rfc6750 import BearerTokenGenerator
 from django.http import HttpRequest, HttpResponse
 
 from sso2.core.models.user_model import User
+from sso2.oauth.grants.authentication_methods import JWTClientAuth
 from sso2.oauth.grants.authorization_code import MyAuthorizationCodeGrant
 from sso2.oauth.grants.code_challenge import MyCodeChallenge
 from sso2.oauth.grants.introspection_endpoint import MyIntrospectionEndpoint
@@ -115,3 +116,11 @@ server.register_grant(ClientCredentialsGrant)
 server.register_grant(ImplicitGrant)
 server.register_grant(MyOpenIDImplicitGrant)
 server.register_grant(MyOpenIDHybridGrant)
+server.register_client_auth_method(
+    "client_secret_jwt",
+    JWTClientAuth(client_auth_method="client_secret_jwt"),
+)
+server.register_client_auth_method(
+    "private_key_jwt",
+    JWTClientAuth(client_auth_method="private_key_jwt"),
+)

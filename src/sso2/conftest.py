@@ -20,7 +20,7 @@ def tenant(
 ) -> Tenant:
     with django_db_blocker.unblock():
         assert Tenant.objects.count() == 0
-        tenant = Tenant.create_example(name="test-tenant")
+        tenant = Tenant.create_example(name="test")
         tenant.save()
         return tenant
 

@@ -1,6 +1,6 @@
+import urllib.parse
 from urllib.parse import urljoin
 
-from django.conf import settings
 from django.contrib.auth.views import redirect_to_login
 from django.http import HttpResponse
 from django.shortcuts import render
@@ -32,13 +32,16 @@ def human_friendly_scope(scope: str) -> str:
 
 
 @require_http_methods(["GET", "POST"])
-def oauth2_authorize(request: HttpRequestWithUser, tenant_id: str) -> HttpResponse:
-    tenant = Tenant.get_or_404(tenant_id=tenant_id)
+def oauth2_authorize(request: HttpRequestWithUser) -> HttpResponse:
+    tenant_name = request.headers["HOST"].rsplit(".", 2)[0]
+    tenant = Tenant.get_or_404(tenant_id=tenant_name)
     if not request.user.is_authenticated:
-        resolved_login_url = reverse("home", kwargs={"tenant_id": tenant.id})
+        resolved_login_url = reverse("login")
+        url = urllib.parse.urlparse(request.build_absolute_uri())
+        next_url = urllib.parse.parse_qs(url.query)["redirect_uri"][0]
         return redirect_to_login(
-            next=request.build_absolute_uri(),
-            login_url=urljoin(settings.APP_HOST, resolved_login_url),
+            next=next_url,
+            login_url=urljoin(f"https://{tenant_name}.i-1.app", resolved_login_url),
         )
 
     grant = server.get_consent_grant(request, end_user=request.user)
@@ -55,6 +58,7 @@ def oauth2_authorize(request: HttpRequestWithUser, tenant_id: str) -> HttpRespon
                 "grant": grant,
                 "client": client,
                 "scopes": [human_friendly_scope(s) for s in scope.split()],
+                "scope": scope,
                 "user": request.user,
             },
         )
@@ -64,5 +68,5 @@ def oauth2_authorize(request: HttpRequestWithUser, tenant_id: str) -> HttpRespon
             tenant=tenant,
             client_id=request.POST["client_id"],
         )
-        client.authorize(scope=request.POST["scope"], user=request.user)
+        client.authorize(scope=request.POST.get("scope"), user=request.user)
     return server.create_authorization_response(request, grant_user=grant_user)

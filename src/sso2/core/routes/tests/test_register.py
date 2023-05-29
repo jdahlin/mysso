@@ -155,15 +155,16 @@ def test_register(
         data["confirm_password"] = secrets.token_hex(16)
 
     response = client.post(
-        reverse("register", kwargs={"tenant_id": tenant.id}),
+        reverse("register"),
         data=data,
+        HTTP_HOST="test.i-1.app",
     )
     assert response.status_code == status_code
     if status_code == http.HTTPStatus.OK:
         assert response.context["form"].errors == form_errors
         assert len(mail.outbox) == 0
     else:
-        assert response.headers["Location"] == f"/tenant/{tenant.id}/login"
+        assert response.headers["Location"] == "/login"
 
         user = User.objects.get(email="bob.smith@example.com")
         assert user.tenant

@@ -46,7 +46,7 @@ def reset_password(
             if form.is_valid():
                 user.password = form.cleaned_data["password"]
                 user.save()
-                return redirect(reverse("login", kwargs={"tenant_id": tenant_id}))
+                return redirect(reverse("login"))
 
     context = {
         "action": reverse(
