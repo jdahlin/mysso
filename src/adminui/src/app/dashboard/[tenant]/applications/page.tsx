@@ -20,6 +20,8 @@ import { ApplicationListTable } from "src/sections/dashboard/applications/applic
 import type { Application } from 'src/types/application';
 import {RouterLink} from "src/components/router-link";
 import {paths} from "src/paths";
+import {useAuth} from "src/hooks/use-auth";
+import {AuthContextType as Auth0AuthContextType} from "src/contexts/auth/auth0";
 
 interface Filters {
   query?: string;
@@ -111,11 +113,14 @@ const useApplicationsStore = (searchState: ApplicationsSearchState) => {
     applications: [],
     applicationsCount: 0
   });
+  const { getTokenSilently } = useAuth<Auth0AuthContextType>();
 
-  const handleCustomersGet = useCallback(
+
+  const handleApplicationsGet = useCallback(
     async () => {
+      const token = await getTokenSilently()
       try {
-        const response = await applicationsApi.getApplications(searchState);
+        const response = await applicationsApi.getApplications(token, searchState);
 
         if (isMounted()) {
           setState({
@@ -127,12 +132,12 @@ const useApplicationsStore = (searchState: ApplicationsSearchState) => {
         console.error(err);
       }
     },
-    [searchState, isMounted]
+    [searchState, isMounted, getTokenSilently]
   );
 
   useEffect(
     () => {
-      handleCustomersGet();
+      handleApplicationsGet();
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [searchState]
@@ -143,10 +148,10 @@ const useApplicationsStore = (searchState: ApplicationsSearchState) => {
   };
 };
 
-const useApplicationIds = (applications: Application[] = []) => {
+const useApplicationIds = (applications: Application[] = []): string[] => {
   return useMemo(
     () => {
-      return applications.map((application) => application.id);
+      return applications.map((application) => application.id.toString());
     },
     [applications]
   );

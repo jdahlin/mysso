@@ -6,12 +6,14 @@ export interface State {
   isInitialized: boolean;
   isAuthenticated: boolean;
   user: User | null;
+  token: string | null;
 }
 
 export const initialState: State = {
   isAuthenticated: false,
   isInitialized: false,
-  user: null
+  user: null,
+  token: null
 };
 
 type AppState = {
@@ -23,12 +25,14 @@ export interface AuthContextType extends State {
   loginWithRedirect: (appState?: AppState) => Promise<void>;
   handleRedirectCallback: () => Promise<AppState | undefined>;
   logout: () => Promise<void>;
+  getTokenSilently: () => Promise<string>;
 }
 
 export const AuthContext = createContext<AuthContextType>({
   ...initialState,
   issuer: Issuer.Auth0,
   loginWithRedirect: () => Promise.resolve(),
+  getTokenSilently: () => Promise.resolve(''),
   handleRedirectCallback: () => Promise.resolve(undefined),
   logout: () => Promise.resolve()
 });

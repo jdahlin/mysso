@@ -124,7 +124,7 @@ export const ApplicationListTable: FC<Props> = (props) => {
           </TableHead>
           <TableBody>
             {items.map((application) => {
-              const isSelected = selected.includes(application.id);
+              const isSelected = selected.includes(application.id.toString());
               return (
                 <TableRow
                   hover

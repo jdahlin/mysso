@@ -21,21 +21,27 @@ type GetApplicationsResponse = Promise<{
 }>;
 
 type GetApplicationRequest = {
-  applicationId?: string;
+  applicationId?: number;
 };
 
 type GetApplicationResponse = Promise<Application>;
 
-type UpdateApplicationRequest = {
-    application: Application
+type CreateApplicationRequest = {
+    application: Omit<Application, 'id'>
 }
 
+type UpdateApplicationRequest = {
+    application: Omit<Application, 'id'>
+}
+
+
 class ApplicationApiService {
-  async getApplications(request: GetApplicationsRequest = {}): GetApplicationsResponse {
+  async getApplications(token: string, request: GetApplicationsRequest = {}): GetApplicationsResponse {
     const { filters, page, rowsPerPage, sortBy, sortDir } = request;
 
     const headers = new Headers();
     headers.set('X-Tenant', 'master')
+    headers.set('Authorization', `Bearer ${token}`)
     const response = await fetch('/api/application', { headers })
 
     let data = await response.json() as Application[]
@@ -73,23 +79,35 @@ class ApplicationApiService {
     return Promise.resolve({ data, count });
   }
 
-  async getApplication(request: GetApplicationRequest): GetApplicationResponse {
+  async getApplication(token: string, request: GetApplicationRequest): GetApplicationResponse {
     const { applicationId } = request;
     if (!applicationId) {
       return Promise.reject(new Error('Application ID required'))
     }
     const headers = new Headers();
-    headers.set('X-Tenant', 'master')
+    headers.set('Content-Type', 'application/json')
+    headers.set('Authorization', `Bearer ${token}`)
+    headers.set('X-Tenant', 'master');
     const response = await fetch(`/api/application/${applicationId}`, { headers })
     return await response.json() as Application;
   }
 
-  async updateApplication(request: UpdateApplicationRequest) {
+  async updateApplication(token: string, request: UpdateApplicationRequest) {
     const { application } = request;
     const headers = new Headers();
-    headers.set('X-Tenant', 'master')
     headers.set('Content-Type', 'application/json')
+    headers.set('Authorization', `Bearer ${token}`)
+    headers.set('X-Tenant', 'master')
     const response = await fetch(`/api/application/${application.client_id}`, { method: 'PUT', headers, body: JSON.stringify(application) })
+    return await response.json() as Application;
+  }
+  async createApplication(token: string, request: CreateApplicationRequest) {
+    const { application } = request;
+    const headers = new Headers();
+    headers.set('Content-Type', 'application/json')
+    headers.set('Authorization', `Bearer ${token}`)
+    headers.set('X-Tenant', 'master')
+    const response = await fetch(`/api/application/`, { method: 'POST', headers, body: JSON.stringify(application) })
     return await response.json() as Application;
   }
 }

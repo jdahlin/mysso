@@ -198,6 +198,13 @@ export const AuthProvider: FC<AuthProviderProps> = (props) => {
     []
   );
 
+  const getTokenSilently = useCallback(
+    async (): Promise<string> => {
+      return (await auth0Client!.getTokenSilently());
+    },
+    []
+  );
+
   return (
     <AuthContext.Provider
       value={{
@@ -205,7 +212,8 @@ export const AuthProvider: FC<AuthProviderProps> = (props) => {
         issuer: Issuer.Auth0,
         loginWithRedirect,
         handleRedirectCallback,
-        logout
+        logout,
+        getTokenSilently
       }}
     >
       {children}

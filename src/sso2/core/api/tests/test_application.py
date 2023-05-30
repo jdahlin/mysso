@@ -7,12 +7,16 @@ from django.test import Client
 from django.urls import reverse
 
 from sso2.core.keyutils import create_client_certificate
-from sso2.core.models import Tenant
+from sso2.core.models import Tenant, User
 from sso2.oauth.models import OAuth2Client
 
 
 @pytest.mark.django_db
-def test_application_credential(tenant: Tenant, client: Client) -> None:
+def test_application_credential(
+    tenant: Tenant,
+    test_client: Client,
+    user: User,
+) -> None:
     oauth2_client = OAuth2Client.create_example(tenant=tenant)
     oauth2_client.save()
 
@@ -25,11 +29,14 @@ def test_application_credential(tenant: Tenant, client: Client) -> None:
         "application-credential",
         kwargs={"client_id": str(oauth2_client.id)},
     )
-    pem_data = certificate.public_bytes(Encoding.PEM).decode("utf-8")
-    response = client.post(
+    response = test_client.post(
         path,
-        data={"pem_data": pem_data, "name": "First key"},
+        data={
+            "pem_data": certificate.public_bytes(Encoding.PEM).decode("utf-8"),
+            "name": "First key",
+        },
         content_type="application/json",
+        HTTP_AUTHORIZATION="Bearer " + oauth2_client.get_access_token(user=user),
         HTTP_HOST="test.i-1.app",
     )
 

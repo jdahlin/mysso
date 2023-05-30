@@ -140,7 +140,7 @@ marker2 = object()
     ],
 )
 def test_register(
-    client: Client,
+    test_client: Client,
     tenant: Tenant,
     data: EmailFormData,
     status_code: http.HTTPStatus,
@@ -154,7 +154,7 @@ def test_register(
     if data["confirm_password"] is marker2:
         data["confirm_password"] = secrets.token_hex(16)
 
-    response = client.post(
+    response = test_client.post(
         reverse("register"),
         data=data,
         HTTP_HOST="test.i-1.app",

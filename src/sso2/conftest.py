@@ -26,6 +26,22 @@ def tenant(
 
 
 @pytest.fixture(scope="session")
+@pytest.mark.django_db
+def oauth2_client(
+    django_db_setup: None,
+    django_db_blocker: _DatabaseBlocker,
+    tenant: Tenant,
+) -> OAuth2Client:
+    with django_db_blocker.unblock():
+        try:
+            oauth2_client = OAuth2Client.objects.get(client_id="TESTCLIENT")
+        except OAuth2Client.DoesNotExist:
+            oauth2_client = OAuth2Client.create_example(tenant=tenant)
+            oauth2_client.save()
+        return oauth2_client
+
+
+@pytest.fixture(scope="session")
 def user(
     django_db_setup: None,
     tenant: Tenant,
@@ -45,11 +61,3 @@ def user(
             user.tenant = tenant
         user.save()
         yield user
-
-
-@pytest.fixture
-@pytest.mark.django_db
-def oauth2_client(tenant: Tenant) -> Iterator[OAuth2Client]:
-    oauth2_client = OAuth2Client.create_example(tenant=tenant)
-    oauth2_client.save()
-    yield oauth2_client

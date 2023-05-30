@@ -182,6 +182,11 @@ See <a href="https://tools.ietf.org/html/rfc7636">RFC 7636</a> for more informat
             scope=scope,
         )
 
+    def get_access_token(self, *, user: "User | None" = None) -> str:
+        from sso2.oauth.grants.authorization_server import access_token_generator
+
+        return access_token_generator(client=self, user=user)
+
     @classmethod
     def create_example(
         cls,

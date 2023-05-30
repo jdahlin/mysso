@@ -97,14 +97,14 @@ def create_private_key_jwt_assertion(*, oauth2_client: OAuth2Client) -> str:
     ],
 )
 def test_oauth2_flows(
-    client: Client,
+    test_client: Client,
     user: User,
     tenant: Tenant,
     flow: OAuth2Flow,
     response_type: str,
     token_endpoint_auth_method: str,
 ) -> None:
-    assert client.login(email=user.email, password="password")
+    assert test_client.login(email=user.email, password="password")
     grant_type = flow_to_grant_type(flow)
     oauth2_client = OAuth2Client.create_example(
         tenant=tenant,
@@ -143,7 +143,7 @@ def test_oauth2_flows(
             oauth2_client=oauth2_client,
         )
         data["client_assertion_type"] = JWT_BEARER_ASSERTION_TYPE
-    response = client.post(path, data=data, **headers)
+    response = test_client.post(path, data=data, **headers)
     assert response.status_code == http.HTTPStatus.FOUND
 
     url = urllib.parse.urlparse(response.headers["Location"])

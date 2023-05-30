@@ -24,6 +24,8 @@ import InputAdornment from "@mui/material/InputAdornment";
 import IconButton from "@mui/material/IconButton";
 import {GrantTypeField} from "src/sections/dashboard/applications/GrantTypeField";
 import {applicationsApi} from "src/service/applications/ApplicationApiService";
+import {useAuth} from "src/hooks/use-auth";
+import {AuthContextType as Auth0AuthContextType} from "src/contexts/auth/auth0";
 
 interface CategoryOption {
   label: string;
@@ -60,7 +62,7 @@ const categoryOptions: CategoryOption[] = [
 type Values = {
   client_id?: string;
   client_name: string;
-  client_secret?: string;
+  client_secret: string;
   description?: string;
   tenant: string;
   authorization_code_grant: boolean;
@@ -76,6 +78,7 @@ type Values = {
 const emptyValues: Values = {
   client_name: '',
   tenant: 'master',
+  client_secret: '',
   authorization_code_grant: true,
   client_credentials_grant: false,
   implicit_grant: false,
@@ -95,6 +98,15 @@ const validationSchema = Yup.object({
   device_code_grant: Yup.boolean().required(),
 });
 
+function generateRandomString(length: number): string {
+  var text = "";
+  var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  for (var i = 0; i < length; i++) {
+    text += possible.charAt(Math.floor(Math.random() * possible.length));
+  }
+  return text;
+}
+
 type Props = {
   application?: Application
 }
@@ -102,18 +114,27 @@ type Props = {
 export const ApplicationDetailsTab: FC<Props> = ({application}) => {
   const router = useRouter();
   const [files, setFiles] = useState<File[]>([]);
+  const { getTokenSilently } = useAuth<Auth0AuthContextType>();
+  let initialValues: Application | Values | undefined = application;
+  if (!initialValues) {
+    initialValues = structuredClone(emptyValues);
+    initialValues.client_secret = generateRandomString(32);
+  }
+
   const formik = useFormik({
     initialValues: application ?? emptyValues,
     enableReinitialize: true,
     validationSchema,
     onSubmit: async (values, helpers): Promise<void> => {
+      const token = await getTokenSilently()
       try {
         if (application) {
-          applicationsApi.updateApplication({ application: values });
+          applicationsApi.updateApplication(token, { application: values as Application });
+          toast.success('Application updated');
         } else {
+          toast.success('Application created');
+          // applicationsApi.createApplication(token, { application: values as Application });
         }
-        // NOTE: Make API request
-        toast.success('Application created');
         router.push(paths.dashboard.applications.index);
       } catch (err) {
         console.error(err);

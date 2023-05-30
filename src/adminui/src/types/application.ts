@@ -1,5 +1,6 @@
 export type Application = {
-  id: string;
+  // FIXME: change id to nanoid and remove client_id
+  id: number;
   client_name: string;
   client_id: string;
   client_secret: string;
@@ -10,7 +11,6 @@ export type Application = {
   password_grant: boolean;
   refresh_token_grant: boolean;
   device_code_grant: boolean;
-
   require_code_challenge?: boolean;
   require_nounce?: boolean;
   response_type?: string;

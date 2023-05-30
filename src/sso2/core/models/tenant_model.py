@@ -38,6 +38,10 @@ class Tenant(Model):
     algorithm = TextField()
     display_name = TextField()
 
+    @property
+    def host(self) -> str:
+        return f"{self.name}.{settings.APP_DOMAIN_NAME}"
+
     @classmethod
     def create_example(
         cls,
@@ -81,7 +85,7 @@ class Tenant(Model):
                 raise Http404 from e
 
     def get_issuer(self) -> str:
-        return f"https://{self.name}.{settings.APP_DOMAIN_NAME}/"
+        return f"https://{self.host}/"
 
     def get_private_key(self) -> RSAKey:
         return get_private_key_from_path(self.private_key_path)

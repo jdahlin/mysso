@@ -79,7 +79,7 @@ marker2 = object()
 )
 def test_reset_password(
     *,
-    client: Client,
+    test_client: Client,
     tenant: Tenant,
     user: User,
     data: RestPasswordForm,
@@ -95,7 +95,7 @@ def test_reset_password(
     if data["confirm_password"] is marker2:
         data["confirm_password"] = secrets.token_hex(16)
     token = generate_email_token(user) if valid_token else "invalid_token"
-    response = client.post(
+    response = test_client.post(
         reverse("reset_password", kwargs={"tenant_id": tenant.id, "token": token}),
         data=data,
         HTTP_HOST="test.i-1.app",

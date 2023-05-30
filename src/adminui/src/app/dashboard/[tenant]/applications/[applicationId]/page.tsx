@@ -29,6 +29,8 @@ import { getInitials } from 'src/utils/get-initials';
 import type { Application } from 'src/types/application';
 import {usePathname} from "next/navigation";
 import {ApplicationDetailsTab} from "src/sections/dashboard/applications/ApplicationDetailsTab";
+import {useAuth} from "src/hooks/use-auth";
+import {AuthContextType as Auth0AuthContextType} from "src/contexts/auth/auth0";
 
 const tabs = [
   { label: 'Details', value: 'details' },
@@ -36,31 +38,33 @@ const tabs = [
   { label: 'Logs', value: 'logs' }
 ];
 
-const useApplication = (applicationId: string | undefined): Application | null => {
+const useApplication = (applicationId: number | undefined): Application | null => {
   const isMounted = useMounted();
-  const [customer, setCustomer] = useState<Application | null>(null);
+  const [application, setApplication] = useState<Application | null>(null);
+  const { getTokenSilently } = useAuth<Auth0AuthContextType>();
 
-  const handleCustomerGet = useCallback(async () => {
+  const handleApplicationGet = useCallback(async () => {
+    const token = await getTokenSilently()
     try {
-      const response = await applicationsApi.getApplication({ applicationId })
+      const response = await applicationsApi.getApplication(token, { applicationId })
 
       if (isMounted()) {
-        setCustomer(response);
+        setApplication(response);
       }
     } catch (err) {
       console.error(err);
     }
-  }, [isMounted, applicationId])
+  }, [isMounted, applicationId, getTokenSilently])
 
   useEffect(
     () => {
-      handleCustomerGet();
+      handleApplicationGet();
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
 
-  return customer;
+  return application;
 };
 
 
@@ -68,7 +72,7 @@ const Page = () => {
   const [currentTab, setCurrentTab] = useState<string>('details');
   const pathname = usePathname() ?? '';
   const applicationId = pathname.split('/').pop();
-  const application = useApplication(applicationId);
+  const application = useApplication(parseInt(applicationId ?? '0', 10))
 
   usePageView();
 

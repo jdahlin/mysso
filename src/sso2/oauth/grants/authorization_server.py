@@ -26,20 +26,20 @@ from sso2.oauth.models.oauth2_token_model import OAuth2Token
 # This implements most of: https://www.rfc-editor.org/rfc/rfc9068.html
 def access_token_generator(
     client: OAuth2Client,
-    grant_type: str,
-    user: User | None = None,
-    scope: str | None = None,
+    grant_type: str = "authorization_code",
+    exp: int | None = None,
+    sub: str | int | None = None,
+    iss: str | None = None,
 ) -> str:
     tenant = client.tenant
     private_key = tenant.get_private_key()
     now = int(time.time())
-    sub: int | str | None
-    if grant_type == "client_credentials":
+    if sub is None and grant_type == "client_credentials":
         sub = client.client_id
-    elif user and scope and "openid" in scope:
-        sub = user.pk
-    else:
-        sub = None
+    if exp is None:
+        exp = now + 3600
+    if iss is None:
+        iss = tenant.get_issuer()
 
     header = {
         "typ": "at+JWT",
@@ -52,10 +52,10 @@ def access_token_generator(
         "aud": [client.client_id],
         "auth_time": now,
         "client_id": client.client_id,
-        "exp": now + 3600,
+        "exp": exp,
         "jti": uuid.uuid4().hex,
         "iat": now,
-        "iss": tenant.get_issuer(),
+        "iss": iss,
         "sub": sub,
     }
 
