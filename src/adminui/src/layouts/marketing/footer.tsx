@@ -25,10 +25,6 @@ const sections: Section[] = [
     title: 'Menu',
     items: [
       {
-        title: 'Browse Components',
-        path: paths.components.index
-      },
-      {
         title: 'Documentation',
         external: true,
         path: paths.docs

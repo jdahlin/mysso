@@ -4,7 +4,7 @@ from contextlib import nullcontext
 
 import pytest
 from django.test import Client
-from rest_framework.exceptions import AuthenticationFailed, ParseError
+from rest_framework.exceptions import AuthenticationFailed
 
 from sso2.core.drfauth import parse_authorization_header
 from sso2.core.models import Tenant, User
@@ -37,12 +37,12 @@ class AuthHeaderData:
     [
         pytest.param(
             AuthHeaderData(token="foo bar"),
-            ParseError("Invalid authentication header"),
+            AuthenticationFailed("Invalid authentication header"),
             id="invalid-auth-header",
         ),
         pytest.param(
             AuthHeaderData(token="Bearer invalid-token"),
-            ParseError("Invalid token"),
+            AuthenticationFailed("Invalid token"),
             id="invalid-token",
         ),
         pytest.param(

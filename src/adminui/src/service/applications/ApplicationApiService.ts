@@ -43,6 +43,12 @@ class ApplicationApiService {
     headers.set('X-Tenant', 'master')
     headers.set('Authorization', `Bearer ${token}`)
     const response = await fetch('/api/application', { headers })
+    if (!response.ok) {
+      let error = new Error('Error fetching applications')
+      // @ts-ignore
+      error.response = response;
+      return Promise.reject(error)
+    }
 
     let data = await response.json() as Application[]
     //let data = deepCopy(applications) as Application[];

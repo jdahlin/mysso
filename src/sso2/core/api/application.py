@@ -6,6 +6,7 @@ from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
 from rest_framework.fields import SerializerMethodField
+from rest_framework.filters import OrderingFilter
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.serializers import ModelSerializer
@@ -30,6 +31,7 @@ class ApplicationCredentialSerializer(ModelSerializer):
     class Meta:
         model = OAuth2ClientCredential
         fields = "__all__"
+        ordering = ["-created_at"]
 
     def create(self, validated_data: dict[str, Any]) -> OAuth2ClientCredential:
         as_bytes = validated_data["pem_data"].encode("utf-8")
@@ -44,6 +46,7 @@ class ApplicationCredentialSerializer(ModelSerializer):
 class ApplicationViewSet(ModelViewSet):
     queryset = OAuth2Client.objects.all()
     serializer_class = ApplicationSerializer
+    filter_backends = [OrderingFilter]
     lookup_field = "pk"
     lookup_url_kwarg = "client_id"
     lookup_value_converter = "int"

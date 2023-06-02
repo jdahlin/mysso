@@ -24,18 +24,27 @@ from sso2.oauth.models.oauth2_token_model import OAuth2Token
 
 
 # This implements most of: https://www.rfc-editor.org/rfc/rfc9068.html
+# FIXME: split in two functions, one for authlib and
+# one lower level for the JWT generation
 def access_token_generator(
     client: OAuth2Client,
     grant_type: str = "authorization_code",
     exp: int | None = None,
     sub: str | int | None = None,
     iss: str | None = None,
+    user: User | None = None,
+    scope: str | None = None,
 ) -> str:
     tenant = client.tenant
     private_key = tenant.get_private_key()
     now = int(time.time())
-    if sub is None and grant_type == "client_credentials":
-        sub = client.client_id
+    if sub and user:
+        raise TypeError
+    if sub is None:
+        if grant_type == "client_credentials":
+            sub = client.client_id
+        if user and scope and "openid" in scope:
+            sub = user.pk
     if exp is None:
         exp = now + 3600
     if iss is None:

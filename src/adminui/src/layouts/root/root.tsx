@@ -20,8 +20,12 @@ import { useNprogress } from 'src/hooks/use-nprogress';
 import { createTheme } from 'src/theme';
 import type { Settings } from 'src/types/settings';
 
+import {Refine} from "@refinedev/core";
+
 // Remove if locales are not used
 import 'src/locales/i18n';
+import routerProvider from "@refinedev/nextjs-router";
+import {drfDataProvider} from "src/drfDataProvider";
 
 const SETTINGS_STORAGE_KEY = 'app.settings';
 
@@ -91,13 +95,30 @@ export const Layout: FC<LayoutProps> = (props: LayoutProps) => {
                           />
                         </Head>
                         <RTL direction={settings.direction}>
-                          <CssBaseline />
-                          {
-                            showSlashScreen
-                              ? <SplashScreen />
-                              : <>{children}</>
-                          }
-                          <Toaster />
+                          <Refine
+                            // routerProvider={routerProvider}
+                            dataProvider={drfDataProvider}
+                            resources={[
+                              {
+                                name: "application",
+                                list: "/applications2",
+                                create: "/applications2/create",
+                                edit: "/applications2/edit/:id",
+                                show: "/applications2/show/:id",
+                                meta: {
+                                  canDelete: true,
+                                },
+                              },
+                            ]}
+                          >
+                            <CssBaseline />
+                            {
+                              showSlashScreen
+                                ? <SplashScreen />
+                                : <>{children}</>
+                            }
+                            <Toaster />
+                          </Refine>
                         </RTL>
                       </ThemeProvider>
                     );

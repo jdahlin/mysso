@@ -32,10 +32,6 @@ interface Item {
 
 const items: Item[] = [
   {
-    title: 'Components',
-    path: paths.components.index
-  },
-  {
     title: 'Pages',
     popover: <PagesPopover />
   },

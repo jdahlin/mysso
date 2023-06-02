@@ -16,6 +16,14 @@ export const initialState: State = {
   token: null
 };
 
+const DISABLE_AUTH = 0;
+if (DISABLE_AUTH) {
+  initialState.isAuthenticated = true;
+  initialState.user = { id: '1', username: 'johan', email: 'jdahlin@gmail.com', name: 'Johan', avatar: 'null'};
+  initialState.isInitialized = true;
+  initialState.token = 'foo';
+}
+
 type AppState = {
   returnTo?: string;
 };

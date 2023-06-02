@@ -211,4 +211,5 @@ REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "sso2.core.drfauth.JWTAuthentication",
     ],
+    "DEFAULT_PAGINATION_CLASS": "sso2.core.pagination.PageNumberWithPageSizePagination",
 }

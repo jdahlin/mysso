@@ -55,27 +55,6 @@ export const Layout: FC<LayoutProps> = (props) => {
       >
         <Container maxWidth="lg">
           <Stack spacing={3}>
-            {!breadcrumbs && (
-              <div>
-                <Link
-                  color="text.primary"
-                  component={RouterLink}
-                  href={paths.components.index}
-                  sx={{
-                    alignItems: 'center',
-                    display: 'inline-flex'
-                  }}
-                  underline="hover"
-                >
-                  <SvgIcon sx={{ mr: 1 }}>
-                    <ArrowLeftIcon />
-                  </SvgIcon>
-                  <Typography variant="subtitle2">
-                    Components
-                  </Typography>
-                </Link>
-              </div>
-            )}
             <div>
               <Typography variant="h1">
                 {title}

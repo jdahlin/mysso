@@ -1,7 +1,6 @@
 from collections.abc import Callable
 
 from django.http import HttpRequest, HttpResponse
-from rest_framework.response import Response
 
 from sso2.core.models import Tenant
 from sso2.core.types import HttpRequestWithUser
@@ -16,7 +15,6 @@ class TenantMiddleware:
         if tenant_name is None:
             tenant_name = request.headers.get("HOST", "").rsplit(".", 2)[0]
 
-        response = Response({"error": "Unauthorized"}, status=401)
         if tenant_name is not None:
             try:
                 tenant = Tenant.objects.get(name=tenant_name)
@@ -24,6 +22,4 @@ class TenantMiddleware:
                 pass
             else:
                 request.tenant = tenant
-                response = self.get_response(request)
-                del request.tenant
-        return response
+        return self.get_response(request)
