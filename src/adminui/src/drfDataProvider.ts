@@ -1,6 +1,5 @@
 import axios from "axios";
 import {DataProvider, HttpError} from "@refinedev/core";
-import {stringify} from "query-string";
 
 const axiosInstance = axios.create();
 
@@ -88,27 +87,8 @@ export const drfDataProvider: DataProvider = {
   updateMany: async ({resource, ids, variables, meta}) => {
     return {data: []}
   },
-  custom: async ({ url, method, sorters, payload, query, headers }) => {
+  custom: async ({ url, method, payload }) => {
     let requestUrl = url;
-
-    if (sorters && sorters.length > 0) {
-      const sortQuery = {
-        _sort: sorters[0].field,
-        _order: sorters[0].order,
-      };
-      requestUrl = `${requestUrl}&${stringify(sortQuery)}`;
-    }
-
-    if (query) {
-      requestUrl = `${requestUrl}&${stringify(query)}`;
-    }
-
-    if (headers) {
-      axiosInstance.defaults.headers = {
-        ...axiosInstance.defaults.headers,
-        ...headers,
-      };
-    }
 
     let axiosResponse;
     switch (method) {

@@ -262,7 +262,8 @@ export const ApplicationDetailsTab: FC<Props> = ({application}) => {
                     InputProps={{
                       endAdornment: (
                         <InputAdornment position="end">
-                          <IconButton size="small" sx={{p: 0}} color={"primary"}>
+                          <IconButton size="small" sx={{p: 0}} color={"primary"}
+                                      onClick={() => {navigator.clipboard.writeText(formik.values.client_secret)}}>
                             <ContentCopyIcon fontSize={'small'}/>
                           </IconButton>
                         </InputAdornment>
