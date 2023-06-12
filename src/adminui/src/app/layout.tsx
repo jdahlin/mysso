@@ -5,6 +5,7 @@ import 'simplebar-react/dist/simplebar.min.css';
 import {cookies} from "next/headers";
 import {Settings} from "src/types/settings";
 import { Layout as RootLayout } from 'src/layouts/root';
+import {UserProvider} from "@auth0/nextjs-auth0/client";
 
 // Force-Dynamic is required otherwise all pages are marked as client-side
 // due to the usage of the "cookies" function.
@@ -122,9 +123,11 @@ const Layout = (props: LayoutProps) => {
         <Vendors />
       </head>
       <body>
-        <RootLayout settings={settings}>
-          {children}
-        </RootLayout>
+        <UserProvider>
+          <RootLayout settings={settings}>
+            {children}
+          </RootLayout>
+        </UserProvider>
       </body>
     </html>
   );

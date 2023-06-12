@@ -1,5 +1,5 @@
 import type {FC} from 'react';
-import React, {useCallback, useEffect, useState} from 'react';
+import React, {useCallback, useState} from 'react';
 import toast from 'react-hot-toast';
 import * as Yup from 'yup';
 import {useFormik} from 'formik';
@@ -23,41 +23,7 @@ import {Application} from "src/types/application";
 import InputAdornment from "@mui/material/InputAdornment";
 import IconButton from "@mui/material/IconButton";
 import {GrantTypeField} from "src/sections/dashboard/applications/GrantTypeField";
-import {applicationsApi} from "src/service/applications/ApplicationApiService";
-import {useAuth} from "src/hooks/use-auth";
-import {AuthContextType as Auth0AuthContextType} from "src/contexts/auth/auth0";
-
-interface CategoryOption {
-  label: string;
-  value: string;
-}
-
-const categoryOptions: CategoryOption[] = [
-  {
-    label: 'Healthcare',
-    value: 'healthcare'
-  },
-  {
-    label: 'Makeup',
-    value: 'makeup'
-  },
-  {
-    label: 'Dress',
-    value: 'dress'
-  },
-  {
-    label: 'Skincare',
-    value: 'skincare'
-  },
-  {
-    label: 'Jewelry',
-    value: 'jewelry'
-  },
-  {
-    label: 'Blouse',
-    value: 'blouse'
-  }
-];
+import { useCreate, useUpdate } from "@refinedev/core";
 
 type Values = {
   client_id?: string;
@@ -114,7 +80,8 @@ type Props = {
 export const ApplicationDetailsTab: FC<Props> = ({application}) => {
   const router = useRouter();
   const [files, setFiles] = useState<File[]>([]);
-  const { getTokenSilently } = useAuth<Auth0AuthContextType>();
+  const { mutate: create } = useCreate();
+  const { mutate: update } = useUpdate();
   let initialValues: Application | Values | undefined = application;
   if (!initialValues) {
     initialValues = structuredClone(emptyValues);
@@ -126,14 +93,13 @@ export const ApplicationDetailsTab: FC<Props> = ({application}) => {
     enableReinitialize: true,
     validationSchema,
     onSubmit: async (values, helpers): Promise<void> => {
-      const token = await getTokenSilently()
       try {
         if (application) {
-          applicationsApi.updateApplication(token, { application: values as Application });
+          update({ resource: "applications", values, id: (values as Application).id });
           toast.success('Application updated');
         } else {
+          create({ resource: "applications", values });
           toast.success('Application created');
-          // applicationsApi.createApplication(token, { application: values as Application });
         }
         router.push(paths.dashboard.applications.index);
       } catch (err) {

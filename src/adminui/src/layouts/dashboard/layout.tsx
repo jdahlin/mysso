@@ -1,7 +1,7 @@
 import type { FC, ReactNode } from 'react';
 import PropTypes from 'prop-types';
 
-import { withAuthGuard } from 'src/hocs/with-auth-guard';
+import { withPageAuthRequired } from '@auth0/nextjs-auth0/client'
 import { useSettings } from 'src/hooks/use-settings';
 
 import { useSections } from './config';
@@ -12,7 +12,7 @@ interface LayoutProps {
   children?: ReactNode;
 }
 
-export const Layout: FC<LayoutProps> = withAuthGuard((props) => {
+export const Layout: FC<LayoutProps> = withPageAuthRequired((props) => {
   const settings = useSettings();
   const sections = useSections();
 

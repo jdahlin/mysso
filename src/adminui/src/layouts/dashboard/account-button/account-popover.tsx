@@ -4,7 +4,6 @@ import PropTypes from 'prop-types';
 import toast from 'react-hot-toast';
 import CreditCard01Icon from '@untitled-ui/icons-react/build/esm/CreditCard01';
 import Settings04Icon from '@untitled-ui/icons-react/build/esm/Settings04';
-import User03Icon from '@untitled-ui/icons-react/build/esm/User03';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Divider from '@mui/material/Divider';
@@ -16,7 +15,6 @@ import SvgIcon from '@mui/material/SvgIcon';
 import Typography from '@mui/material/Typography';
 
 import { RouterLink } from 'src/components/router-link';
-import { useAuth } from 'src/hooks/use-auth';
 import { useMockedUser } from 'src/hooks/use-mocked-user';
 import { useRouter } from 'src/hooks/use-router';
 import { paths } from 'src/paths';
@@ -31,37 +29,20 @@ interface AccountPopoverProps {
 export const AccountPopover: FC<AccountPopoverProps> = (props) => {
   const { anchorEl, onClose, open, ...other } = props;
   const router = useRouter();
-  const auth = useAuth();
   const user = useMockedUser();
 
   const handleLogout = useCallback(
     async (): Promise<void> => {
       try {
         onClose?.();
-
-        switch (auth.issuer) {
-          case Issuer.Auth0: {
-            await auth.logout();
-            break;
-          }
-
-          case Issuer.JWT: {
-            await auth.signOut();
-            break;
-          }
-
-          default: {
-            console.warn('Using an unknown Auth Issuer, did not log out');
-          }
-        }
-
+        // FIXME: logout
         router.push(paths.index);
       } catch (err) {
         console.error(err);
         toast.error('Something went wrong!');
       }
     },
-    [auth, router, onClose]
+    [router, onClose]
   );
 
   return (

@@ -15,8 +15,6 @@ import type {Application} from 'src/types/application';
 import {RouterLink} from "src/components/router-link";
 import {paths} from "src/paths";
 import {useTable, HttpError} from "@refinedev/core";
-import {useAuth} from "src/hooks/use-auth";
-import {AuthContextType} from "src/contexts/auth/auth0";
 
 const AddButton = ({href}: { href: string }) => (
   <Button
@@ -33,7 +31,6 @@ const AddButton = ({href}: { href: string }) => (
   </Button>);
 
 const Page = () => {
-  const { token } = useAuth<AuthContextType>();
   const table = useTable<Application, HttpError>({
     resource: "application",
     syncWithLocation: true,

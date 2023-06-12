@@ -1,10 +1,9 @@
 'use client';
 
 import type { ChangeEvent } from 'react';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import ArrowLeftIcon from '@untitled-ui/icons-react/build/esm/ArrowLeft';
 import ChevronDownIcon from '@untitled-ui/icons-react/build/esm/ChevronDown';
-import Edit02Icon from '@untitled-ui/icons-react/build/esm/Edit02';
 import Avatar from '@mui/material/Avatar';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -19,18 +18,14 @@ import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
 import Typography from '@mui/material/Typography';
 
-import { applicationsApi } from 'src/service/applications/ApplicationApiService';
 import { RouterLink } from 'src/components/router-link';
 import { Seo } from 'src/components/seo';
-import { useMounted } from 'src/hooks/use-mounted';
-import { usePageView } from 'src/hooks/use-page-view';
 import { paths } from 'src/paths';
 import { getInitials } from 'src/utils/get-initials';
 import type { Application } from 'src/types/application';
 import {usePathname} from "next/navigation";
 import {ApplicationDetailsTab} from "src/sections/dashboard/applications/ApplicationDetailsTab";
-import {useAuth} from "src/hooks/use-auth";
-import {AuthContextType as Auth0AuthContextType} from "src/contexts/auth/auth0";
+import {useOne} from "@refinedev/core";
 
 const tabs = [
   { label: 'Details', value: 'details' },
@@ -38,44 +33,13 @@ const tabs = [
   { label: 'Logs', value: 'logs' }
 ];
 
-const useApplication = (applicationId: number | undefined): Application | null => {
-  const isMounted = useMounted();
-  const [application, setApplication] = useState<Application | null>(null);
-  const { getTokenSilently } = useAuth<Auth0AuthContextType>();
-
-  const handleApplicationGet = useCallback(async () => {
-    const token = await getTokenSilently()
-    try {
-      const response = await applicationsApi.getApplication(token, { applicationId })
-
-      if (isMounted()) {
-        setApplication(response);
-      }
-    } catch (err) {
-      console.error(err);
-    }
-  }, [isMounted, applicationId, getTokenSilently])
-
-  useEffect(
-    () => {
-      handleApplicationGet();
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
-  );
-
-  return application;
-};
-
-
 const Page = () => {
   const [currentTab, setCurrentTab] = useState<string>('details');
-  const pathname = usePathname() ?? '';
-  const applicationId = pathname.split('/').pop();
-  const application = useApplication(parseInt(applicationId ?? '0', 10))
-
-  usePageView();
-
+  const applicationId = usePathname()?.split('/').pop();
+  const { data, isLoading, isError } = useOne<Application>({
+    resource: 'application',
+    id: applicationId
+  })
   const handleTabsChange = useCallback(
     (event: ChangeEvent<any>, value: string): void => {
       setCurrentTab(value);
@@ -83,6 +47,7 @@ const Page = () => {
     []
   );
 
+  const application = data?.data;
   if (!application) {
     return null;
   }
