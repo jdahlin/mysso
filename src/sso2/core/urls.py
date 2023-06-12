@@ -20,6 +20,7 @@ urlpatterns += [
     # Auth0 compatible endpoints
     path("login", NewLoginView.as_view(), name="login"),
     path("v2/logout", LogoutView.as_view(), name="logout"),
+    # Old
     path("tenant/<uuid:tenant_id>/logout", LogoutView.as_view(), name="logout"),
     path("register", register, name="register"),
     path("tenant/<uuid:tenant_id>/mfa-setup", MFASetupView.as_view(), name="mfa-setup"),
